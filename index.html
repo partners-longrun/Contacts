@@ -86,7 +86,25 @@
             </div>
         </header>
 
-        <main class="flex-1 px-4 py-5 space-y-5 overflow-y-auto no-scrollbar">
+        <main class="flex-1 px-4 py-5 space-y-4 overflow-y-auto no-scrollbar">
+
+            <!-- PWA 스마트폰 홈 화면 추가 안내 메시지 카드 -->
+            <div x-show="showPwaGuide && !isPwaActive()" class="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-4 rounded-2xl relative shadow-sm" x-transition style="display: none;">
+                <button @click="showPwaGuide = false" class="absolute top-3.5 right-3.5 text-amber-500 hover:text-amber-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+                <div class="flex items-start space-x-3">
+                    <div class="p-2 bg-amber-500 text-white rounded-xl shadow-sm text-sm">
+                        📱
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-black text-amber-800">바탕화면 앱 설치 안내</h4>
+                        <p class="text-[11px] text-amber-700 mt-1 leading-relaxed">
+                            브라우저 설정 메뉴에서 <span class="font-bold">['홈 화면에 추가']</span> 혹은 <span class="font-bold">['설치']</span>를 선택하시면 스마트폰 바탕화면에서 터치 한 번으로 빠르게 연락처를 조회하실 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             <!-- 실시간 데이터 동기화 진단 도구 -->
             <div x-show="isDiagOpen" class="bg-slate-800 text-slate-200 p-4 rounded-2xl text-xs space-y-2 font-mono shadow-xl" style="display: none;" x-transition>
@@ -96,7 +114,7 @@
                 </div>
                 <p>상태: <span x-text="syncStatus" :class="syncStatus === '성공' ? 'text-emerald-400' : 'text-rose-400'"></span></p>
                 <p>총 데이터: <span x-text="contacts.length"></span>건</p>
-                <!-- 마지막 동기화 시간 복구 -->
+                <!-- 마지막 동기화 시간 -->
                 <p>마지막 동기화: <span x-text="lastSyncTime || '기록 없음'" class="text-sky-300"></span></p>
                 <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 text-white rounded-lg font-bold mt-2">캐시 초기화 및 재동기화</button>
             </div>
@@ -145,72 +163,73 @@
 
             <!-- 기본 상태 (메인 대시보드 리스트) -->
             <template x-if="searchQuery.trim().length === 0">
-                <div class="space-y-5">
+                <div class="space-y-4">
+                    
+                    <!-- [수정] 파트너스본부: 카드 자체를 손보/생보와 같은 미려한 테두리 카드로 일원화하고 최상단 배치 -->
+                    <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
+                                <h2 class="text-base font-extrabold text-slate-800">파트너스본부</h2>
+                            </div>
+                            <!-- '연락처 보기' 버튼 배치 -->
+                            <button @click="openCompanyDetails('파트너스본부', '파트너스본부')" 
+                                    class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 font-extrabold text-[11px] rounded-xl transition-all active:scale-95">
+                                연락처 보기
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 손해/생명보험 카테고리 반복 루프 -->
                     <template x-for="cat in categoriesList" :key="cat">
                         <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-3">
-                            
-                            <!-- 파트너스본부: 카드 자체 터치 시 즉시 전체 명단 노출 -->
-                            <template x-if="cat === '파트너스본부'">
-                                <div @click="openCompanyDetails('파트너스본부', '파트너스본부')" 
-                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50/30 border border-purple-100 rounded-2xl cursor-pointer active:scale-95 transition-all">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse"></div>
-                                        <h2 class="text-base font-extrabold text-slate-800">파트너스본부</h2>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-2.5 h-2.5 rounded-full" :class="getDotColor(cat)"></div>
+                                        <!-- 카테고리 명칭 및 총 보험사 수 -->
+                                        <h2 class="text-base font-extrabold text-slate-800">
+                                            <span x-text="cat"></span>
+                                            <span class="text-xs font-normal text-slate-400 ml-1" x-text="'(총 ' + getCompaniesByCategory(cat).length + '개)'"></span>
+                                        </h2>
                                     </div>
-                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
                                 </div>
-                            </template>
+                                
+                                <!-- [수정] 즐겨찾기가 하나라도 등록되어 있으면 본 가이드라인 텍스트를 자동으로 숨김 -->
+                                <p x-show="getFavorites(cat).length === 0" class="text-[11px] text-slate-400 mt-1 leading-relaxed" x-transition>
+                                    자주 찾는 보험사를 별표(★)를 눌러 최대 6개까지 홈 화면에 등록해 보세요.
+                                </p>
 
-                            <!-- 손해/생명보험: 즐겨찾기(최대 6개) 및 아코디언 배치 -->
-                            <template x-if="cat !== '파트너스본부'">
-                                <div class="space-y-3">
-                                    <div class="flex justify-between items-center border-b border-slate-50 pb-2">
-                                        <div class="flex items-center space-x-2">
-                                            <div class="w-2.5 h-2.5 rounded-full" :class="getDotColor(cat)"></div>
-                                            <!-- 카테고리 명칭 및 총 보험사 수 복구 -->
-                                            <h2 class="text-base font-extrabold text-slate-800">
-                                                <span x-text="cat"></span>
-                                                <span class="text-xs font-normal text-slate-400 ml-1" x-text="'(총 ' + getCompaniesByCategory(cat).length + '개)'"></span>
-                                            </h2>
+                                <!-- 즐겨찾기 지정 보험사 리스트 -->
+                                <div class="grid grid-cols-2 gap-2" x-show="getFavorites(cat).length > 0">
+                                    <template x-for="comp in getFavorites(cat)" :key="comp">
+                                        <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl active:scale-95 transition-all cursor-pointer">
+                                            <span class="text-xs font-bold text-slate-800 truncate" x-text="comp"></span>
+                                            <button @click.stop="toggleFavorite(comp, cat)" class="text-amber-400">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
+                                            </button>
                                         </div>
-                                    </div>
-                                    
-                                    <!-- 즐겨찾기 안내 문구 복구 -->
-                                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                                        자주 찾는 보험사를 별표(★)를 눌러 최대 6개까지 홈 화면에 등록해 보세요.
-                                    </p>
-
-                                    <!-- 즐겨찾기 지정 보험사 리스트 -->
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <template x-for="comp in getFavorites(cat)" :key="comp">
-                                            <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl active:scale-95 transition-all cursor-pointer">
-                                                <span class="text-xs font-bold text-slate-800 truncate" x-text="comp"></span>
-                                                <button @click.stop="toggleFavorite(comp, cat)" class="text-amber-400">
-                                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
-                                                </button>
-                                            </div>
-                                        </template>
-                                    </div>
-
-                                    <!-- 나머지 보험사 목록 더보기 펼치기 단추 -->
-                                    <button @click="isExpanded[cat] = !isExpanded[cat]" class="w-full flex justify-between items-center py-2.5 px-4 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-500 transition-all">
-                                        <span x-text="isExpanded[cat] ? '기타 보험사 접기' : '기타 보험사 목록 펼치기'"></span>
-                                        <svg class="w-3.5 h-3.5 transition-transform" :class="isExpanded[cat] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
-                                    </button>
-
-                                    <!-- 펼치기 영역 -->
-                                    <div x-show="isExpanded[cat]" class="grid grid-cols-2 gap-2 mt-2" x-transition>
-                                        <template x-for="comp in getRemainingCompanies(cat)" :key="comp">
-                                            <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-slate-50 p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
-                                                <span class="text-xs font-bold text-slate-700 truncate" x-text="comp"></span>
-                                                <button @click.stop="toggleFavorite(comp, cat)" class="text-slate-300">
-                                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                                                </button>
-                                            </div>
-                                        </template>
-                                    </div>
+                                    </template>
                                 </div>
-                            </template>
+
+                                <!-- 나머지 보험사 목록 더보기 펼치기 단추 -->
+                                <button @click="isExpanded[cat] = !isExpanded[cat]" class="w-full flex justify-between items-center py-2.5 px-4 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-500 transition-all">
+                                    <span x-text="isExpanded[cat] ? '기타 보험사 접기' : '기타 보험사 목록 펼치기'"></span>
+                                    <svg class="w-3.5 h-3.5 transition-transform" :class="isExpanded[cat] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+                                </button>
+
+                                <!-- 펼치기 영역 -->
+                                <div x-show="isExpanded[cat]" class="grid grid-cols-2 gap-2 mt-2" x-transition>
+                                    <template x-for="comp in getRemainingCompanies(cat)" :key="comp">
+                                        <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-slate-50 p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                                            <span class="text-xs font-bold text-slate-700 truncate" x-text="comp"></span>
+                                            <button @click.stop="toggleFavorite(comp, cat)" class="text-slate-300">
+                                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -230,7 +249,7 @@
                     <div class="w-full flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] font-extrabold px-2 py-0.5 rounded border" :class="getCategoryStyle(selectedCompanyCat)" x-text="selectedCompanyCat"></span>
-                            <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany === '파트너스본부' ? '파트너스본부' : selectedCompany"></h2>
+                            <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany"></h2>
                         </div>
                         <button @click="selectedCompany = null" class="p-2 text-slate-400">✕</button>
                     </div>
@@ -282,7 +301,7 @@
         // Alpine.js 라이브러리가 로드되었을 때 컴포넌트 객체를 안전하게 정의하여 타이밍 오류 방지
         document.addEventListener('alpine:init', () => {
             Alpine.data('appState', () => ({
-                categoriesList: ['파트너스본부', '손해보험', '생명보험'],
+                categoriesList: ['손해보험', '생명보험'], // 파트너스본부는 상위 고정하여 하드코딩 루프에서 격리
                 favorites: { '손해보험': [], '생명보험': [] },
                 isExpanded: { '손해보험': false, '생명보험': false },
                 contacts: [], 
@@ -297,7 +316,8 @@
                 deferredPrompt: null, 
                 isDiagOpen: false, 
                 syncStatus: '',
-                lastSyncTime: '', // 동기화 시간 변수 추가
+                lastSyncTime: '',
+                showPwaGuide: true, // PWA 저장 안내 메시지 토글 기본값 활성화
 
                 init() {
                     this.loadFavorites();
@@ -307,6 +327,11 @@
                         e.preventDefault(); 
                         this.deferredPrompt = e; 
                     });
+                },
+
+                // PWA 설치 상태를 반환
+                isPwaActive() {
+                    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
                 },
 
                 showToast(msg) {
@@ -485,10 +510,19 @@
                     this.selectedCompanyCat = cat; 
                 },
 
+                // [수정] 구분(category) 열이나 보험사명(company) 열에 '파트너스본부'가 기록된 모든 직원을 입체적으로 취합하여 노출
                 getGroupedCompanyContacts() {
                     if (!this.selectedCompany) return [];
                     const nCat = this.normalizeCategory(this.selectedCompanyCat);
-                    const list = this.contacts.filter(c => (nCat === '파트너스본부' ? this.normalizeCategory(c.category) === '파트너스본부' : c.company === this.selectedCompany));
+                    const list = this.contacts.filter(c => {
+                        if (nCat === '파트너스본부') {
+                            const isCategoryPartners = this.normalizeCategory(c.category) === '파트너스본부' || (c.category || '').trim() === '파트너스본부';
+                            const isCompanyPartners = this.normalizeCategory(c.company) === '파트너스본부' || (c.company || '').trim() === '파트너스본부';
+                            return isCategoryPartners || isCompanyPartners;
+                        }
+                        return c.company === this.selectedCompany;
+                    });
+                    
                     const map = {};
                     list.forEach(c => {
                         const r = c.rank || '미지정';
@@ -529,10 +563,3 @@
     </script>
 </body>
 </html>
-```
-`eof`
-
-### 💡 보완 완료 내역
-* **마지막 동기화 시간 복구**: 설정창(`⚙️`)에서 마지막으로 구글 시트 데이터를 갱신한 정확한 시각이 동기화 성공 여부와 관계없이 기기 내부 캐시에 안전히 저장되어 상시 노출되도록 복구했습니다.
-* **보험사 카운트 및 가이드라인 텍스트 복구**: 손해보험과 생명보험에 대한 총 보험사 숫자가 시트 데이터를 읽어옴과 동시에 동적으로 카운팅 되도록 하였으며, 최대 6개 즐겨찾기 가이드 문구도 메인에 자연스럽게 복구했습니다.
-* **파트너스본부 명칭 간결화**: 이전 버전에서 '파트너스본부 구성원' 등으로 다르게 사용되던 용어를 **'파트너스본부'**로 일관성 있게 수정했습니다.
