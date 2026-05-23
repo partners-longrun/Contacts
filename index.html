@@ -145,8 +145,8 @@
                                             <span class="text-xs text-indigo-600 font-bold" x-text="contact.company"></span>
                                         </div>
                                         <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
-                                            <span x-text="contact.name"></span>
-                                            <span class="text-xs bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded-full" x-text="contact.rank"></span>
+                                            <!-- 이름 + 직급 통합 표기 적용 -->
+                                            <span x-text="getDisplayName(contact)"></span>
                                         </h3>
                                     </div>
                                     <template x-if="normalizeCategory(contact.category) !== '파트너스본부'">
@@ -155,12 +155,12 @@
                                         </button>
                                     </template>
                                 </div>
-                                <!-- 다중 연락처 및 메모 통합 구조 -->
+                                <!-- 다중 연락처 및 메모 통합 구조 (줄간격 축소 정렬) -->
                                 <div class="space-y-2 text-xs border-t border-slate-50 pt-2.5">
                                     <template x-if="contact.phone1">
                                         <div class="flex justify-between items-center py-1">
                                             <div class="flex items-center space-x-1.5">
-                                                <span class="text-slate-400 font-semibold shrink-0">전화1:</span>
+                                                <span class="text-slate-400 font-semibold shrink-0">전화:</span>
                                                 <span class="font-mono text-slate-800 font-bold" x-text="contact.phone1"></span>
                                             </div>
                                             <div class="flex space-x-1.5">
@@ -172,7 +172,7 @@
                                     <template x-if="contact.phone2">
                                         <div class="flex justify-between items-center py-1">
                                             <div class="flex items-center space-x-1.5">
-                                                <span class="text-slate-400 font-semibold shrink-0">전화2:</span>
+                                                <span class="text-slate-400 font-semibold shrink-0">전화:</span>
                                                 <span class="font-mono text-slate-800 font-bold" x-text="contact.phone2"></span>
                                             </div>
                                             <div class="flex space-x-1.5">
@@ -305,26 +305,30 @@
                     </div>
                 </div>
 
-                <!-- 부서원 상세 리스트 (직급별 그룹화) -->
-                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4 no-scrollbar pb-10">
-                    <template x-for="group in getGroupedCompanyContacts()" :key="group.rank">
-                        <div class="space-y-2">
-                            <h3 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-tighter" x-text="group.rank"></h3>
-                            <div class="space-y-2">
+                <!-- 부서원 상세 리스트 (고객센터 분리 및 이름+직급 일체화 적용, 줄간격 축소) -->
+                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5 no-scrollbar pb-10">
+                    <template x-for="group in getGroupedCompanyContacts()" :key="group.title">
+                        <div class="space-y-2.5">
+                            <h3 class="text-xs font-black text-indigo-600 tracking-wide border-l-2 border-indigo-500 pl-2" x-text="group.title"></h3>
+                            <div class="grid gap-2">
                                 <template x-for="contact in group.contacts" :key="contact.phone1 + contact.name">
-                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100" :class="contact.holiday ? 'opacity-50' : ''">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <span class="font-extrabold text-slate-800" x-text="contact.name"></span>
-                                            <template x-if="contact.holiday"><span class="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full font-bold">휴무</span></template>
+                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100" :class="contact.holiday ? 'opacity-50' : ''">
+                                        
+                                        <!-- 이름 + 직급 통합 표기 영역 및 휴무 배지 -->
+                                        <div class="flex justify-between items-center mb-1.5">
+                                            <span class="font-extrabold text-slate-800 text-sm" x-text="getDisplayName(contact)"></span>
+                                            <template x-if="contact.holiday">
+                                                <span class="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full font-bold">휴무</span>
+                                            </template>
                                         </div>
                                         
-                                        <!-- 다중 전화번호, 팩스 및 참고사항 대응을 위한 구조 고도화 -->
-                                        <div class="space-y-2.5 text-xs border-t border-slate-100/70 pt-2.5">
-                                            <!-- 전화번호 1 -->
+                                        <!-- 다중 전화번호, 팩스 및 참고사항 대응을 위한 구조 고도화 (줄간격 축소) -->
+                                        <div class="space-y-1.5 text-xs">
+                                            <!-- 전화번호 1 (레이블 '전화' 통일) -->
                                             <template x-if="contact.phone1">
                                                 <div class="flex justify-between items-center py-0.5">
                                                     <div class="flex items-center space-x-1.5">
-                                                        <span class="text-slate-400 font-semibold">전화1:</span>
+                                                        <span class="text-slate-400 font-semibold">전화:</span>
                                                         <span class="font-mono text-slate-800 font-bold" x-text="contact.phone1"></span>
                                                     </div>
                                                     <div class="flex space-x-1.5">
@@ -334,11 +338,11 @@
                                                 </div>
                                             </template>
                                             
-                                            <!-- 전화번호 2 -->
+                                            <!-- 전화번호 2 (레이블 '전화' 통일) -->
                                             <template x-if="contact.phone2">
                                                 <div class="flex justify-between items-center py-0.5">
                                                     <div class="flex items-center space-x-1.5">
-                                                        <span class="text-slate-400 font-semibold">전화2:</span>
+                                                        <span class="text-slate-400 font-semibold">전화:</span>
                                                         <span class="font-mono text-slate-800 font-bold" x-text="contact.phone2"></span>
                                                     </div>
                                                     <div class="flex space-x-1.5">
@@ -361,7 +365,7 @@
 
                                             <!-- 참고사항 메모 영역 -->
                                             <template x-if="contact.notes">
-                                                <div class="pt-2 border-t border-dashed border-slate-200 text-slate-500 flex items-start space-x-1 text-[11px] leading-relaxed">
+                                                <div class="pt-1.5 border-t border-dashed border-slate-200 text-slate-500 flex items-start space-x-1 text-[11px] leading-relaxed">
                                                     <span class="text-amber-500 shrink-0">📌</span>
                                                     <span x-text="contact.notes"></span>
                                                 </div>
@@ -535,6 +539,17 @@
                     this.fetchData(true); 
                 },
 
+                // 이름 + 직급 규칙 적용 유틸リティ
+                getDisplayName(c) {
+                    const name = (c.name || '').trim();
+                    const rank = (c.rank || '').trim();
+                    // 직급이 없거나 '미지정', 혹은 이미 이름 안에 직급 키워드가 포함된 경우는 이름만 출력
+                    if (!rank || rank === '미지정' || name.includes(rank)) {
+                        return name;
+                    }
+                    return `${name} ${rank}`;
+                },
+
                 async fetchData(userInitiated = false) {
                     this.loading = true; 
                     this.syncStatus = '연결 중';
@@ -547,7 +562,6 @@
                         const json = JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
                         const rows = json.table.rows;
                         
-                        // [보강완료] 전화번호2, 팩스번호, 참고사항까지 안정적으로 수집하도록 칼럼 매핑 확보
                         let colMap = {
                             category: 0, company: 1, sortOrder: 2, rank: 3, name: 4,
                             phone1: 5, phone2: 6, fax: 7, notes: 8, holiday: 9, deleted: 12
@@ -586,11 +600,11 @@
                                 company: getVal(colMap.company), 
                                 sortOrder: getVal(colMap.sortOrder), 
                                 rank: getVal(colMap.rank), 
-                                name: getVal(colMap.name),
+                                name: getVal(getVal(colMap.name) ? colMap.name : colMap.rank), // 이름 비어있으면 직급(ex 고객센터)을 이름으로 폴백
                                 phone1: getVal(colMap.phone1), 
                                 phone2: getVal(colMap.phone2), 
                                 fax: getVal(colMap.fax), 
-                                notes: getVal(colMap.notes), // 참고사항 파싱 데이터 활성화
+                                notes: getVal(colMap.notes), 
                                 holiday: getVal(colMap.holiday).toUpperCase() === 'Y' || getVal(colMap.holiday) === '예'
                             });
                         });
@@ -621,7 +635,6 @@
                     this.selectedCompanyCat = cat; 
                 },
 
-                // 파트너스본부의 모든 구성원이 교차 추적으로 완벽하게 나오도록 개선 완료된 로직
                 getGroupedCompanyContacts() {
                     if (!this.selectedCompany) return [];
                     const nCat = this.normalizeCategory(this.selectedCompanyCat);
@@ -634,16 +647,44 @@
                         return c.company === this.selectedCompany;
                     });
                     
-                    const map = {};
-                    list.forEach(c => {
-                        const r = c.rank || '미지정';
-                        if (!map[r]) map[r] = [];
-                        map[r].push(c);
+                    // 정렬순서 -> 이름순 정렬
+                    const sorted = list.sort((a, b) => {
+                        const orderA = parseFloat(a.sortOrder) || 999;
+                        const orderB = parseFloat(b.sortOrder) || 999;
+                        if (orderA !== orderB) return orderA - orderB;
+                        return a.name.localeCompare(b.name, 'ko');
                     });
-                    return Object.keys(map).map(r => ({
-                        rank: r,
-                        contacts: map[r].sort((a, b) => (parseFloat(a.sortOrder) || 999) - (parseFloat(b.sortOrder) || 999) || a.name.localeCompare(b.name, 'ko'))
-                    }));
+
+                    // 고객센터, 모니터링, 인콜, 전산 관련 주요 키워드 추출 판정용 헬퍼
+                    const isSupportDept = (c) => {
+                        const name = (c.name || '').toLowerCase();
+                        const rank = (c.rank || '').toLowerCase();
+                        const fullTxt = name + ' ' + rank;
+                        return fullTxt.includes('고객센터') || 
+                               fullTxt.includes('모니터링') || 
+                               fullTxt.includes('인콜') || 
+                               fullTxt.includes('전산') || 
+                               fullTxt.includes('헬프데스크') || 
+                               fullTxt.includes('헬프');
+                    };
+
+                    const supportList = sorted.filter(c => isSupportDept(c));
+                    const generalList = sorted.filter(c => !isSupportDept(c));
+
+                    const groups = [];
+                    if (generalList.length > 0) {
+                        groups.push({
+                            title: '👥 소속 구성원',
+                            contacts: generalList
+                        });
+                    }
+                    if (supportList.length > 0) {
+                        groups.push({
+                            title: '🎧 고객센터 / 지원부서',
+                            contacts: supportList
+                        });
+                    }
+                    return groups;
                 },
 
                 filteredSearchResults() {
