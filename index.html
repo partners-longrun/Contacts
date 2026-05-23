@@ -17,6 +17,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4f46e5">
 
+    <!-- 카카오톡 인앱 브라우저 강제 아웃링크(외부 브라우저 실행) 스크립트 -->
+    <script>
+        (function() {
+            const useragt = navigator.userAgent.toLowerCase();
+            const targetUrl = window.location.href;
+            if (useragt.match(/kakaotalk/i)) {
+                // 카카오톡 전용 스키마를 사용하여 외부 기본 브라우저를 강제 작동시킵니다.
+                window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
+            }
+        })();
+    </script>
+
     <script>
         const manifest = {
             "name": "제휴보험사 연락처",
@@ -119,14 +131,14 @@
                 <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 text-white rounded-lg font-bold mt-2">캐시 초기화 및 재동기화</button>
             </div>
             
-            <!-- 통합 검색 활성화 시 결과 노출 영역 -->
+            <!-- 통합 검색 활성화 시 결과 노출 영역 (다중 연락처 구조 전면 반영) -->
             <template x-if="searchQuery.trim().length > 0">
                 <div class="space-y-3">
                     <h2 class="text-xs font-bold text-indigo-600 px-1">검색 결과 (<span x-text="filteredSearchResults().length"></span>건)</h2>
                     <div class="grid gap-2.5">
                         <template x-for="contact in filteredSearchResults()" :key="contact.phone1 + contact.name + contact.company">
                             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm" :class="contact.holiday ? 'opacity-60 bg-slate-50' : ''">
-                                <div class="flex justify-between items-start">
+                                <div class="flex justify-between items-start mb-2.5">
                                     <div>
                                         <div class="flex items-center space-x-1.5 mb-1">
                                             <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border" :class="getCategoryStyle(contact.category)" x-text="normalizeCategory(contact.category)"></span>
@@ -143,14 +155,46 @@
                                         </button>
                                     </template>
                                 </div>
-                                <div class="mt-3 space-y-2 text-sm">
+                                <!-- 다중 연락처 및 메모 통합 구조 -->
+                                <div class="space-y-2 text-xs border-t border-slate-50 pt-2.5">
                                     <template x-if="contact.phone1">
-                                        <div class="flex justify-between py-1 border-b border-dashed border-slate-100">
-                                            <span class="font-mono text-slate-700 font-bold" x-text="contact.phone1"></span>
-                                            <div class="flex space-x-1.5">
-                                                <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-xs bg-slate-100 rounded-lg">복사</button>
-                                                <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-xs font-bold text-white bg-indigo-500 rounded-lg">전화</a>
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex items-center space-x-1.5">
+                                                <span class="text-slate-400 font-semibold shrink-0">전화1:</span>
+                                                <span class="font-mono text-slate-800 font-bold" x-text="contact.phone1"></span>
                                             </div>
+                                            <div class="flex space-x-1.5">
+                                                <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-150 rounded-lg">복사</button>
+                                                <a :href="'tel:' + contact.phone1" class="px-2.5 py-1 text-[10px] font-bold text-white bg-indigo-500 rounded-lg">전화</a>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template x-if="contact.phone2">
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex items-center space-x-1.5">
+                                                <span class="text-slate-400 font-semibold shrink-0">전화2:</span>
+                                                <span class="font-mono text-slate-800 font-bold" x-text="contact.phone2"></span>
+                                            </div>
+                                            <div class="flex space-x-1.5">
+                                                <button @click="copyToClipboard(contact.phone2)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-150 rounded-lg">복사</button>
+                                                <a :href="'tel:' + contact.phone2" class="px-2.5 py-1 text-[10px] font-bold text-white bg-indigo-500 rounded-lg">전화</a>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template x-if="contact.fax">
+                                        <div class="flex justify-between items-center py-1">
+                                            <div class="flex items-center space-x-1.5">
+                                                <span class="text-slate-400 font-semibold shrink-0">팩스:</span>
+                                                <span class="font-mono text-slate-600" x-text="contact.fax"></span>
+                                            </div>
+                                            <button @click="copyToClipboard(contact.fax)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-150 rounded-lg">복사</button>
+                                        </div>
+                                    </template>
+                                    <!-- 참고사항 렌더링 -->
+                                    <template x-if="contact.notes">
+                                        <div class="pt-1.5 border-t border-dashed border-slate-100 text-[11px] text-slate-500 flex items-start space-x-1">
+                                            <span class="text-amber-500 shrink-0">📌</span>
+                                            <span x-text="contact.notes"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -273,15 +317,56 @@
                                             <span class="font-extrabold text-slate-800" x-text="contact.name"></span>
                                             <template x-if="contact.holiday"><span class="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full font-bold">휴무</span></template>
                                         </div>
-                                        <template x-if="contact.phone1">
-                                            <div class="flex justify-between items-center">
-                                                <span class="font-mono text-sm font-bold text-slate-700" x-text="contact.phone1"></span>
-                                                <div class="flex space-x-1.5">
-                                                    <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
-                                                    <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-white bg-indigo-500 font-bold rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
+                                        
+                                        <!-- 다중 전화번호, 팩스 및 참고사항 대응을 위한 구조 고도화 -->
+                                        <div class="space-y-2.5 text-xs border-t border-slate-100/70 pt-2.5">
+                                            <!-- 전화번호 1 -->
+                                            <template x-if="contact.phone1">
+                                                <div class="flex justify-between items-center py-0.5">
+                                                    <div class="flex items-center space-x-1.5">
+                                                        <span class="text-slate-400 font-semibold">전화1:</span>
+                                                        <span class="font-mono text-slate-800 font-bold" x-text="contact.phone1"></span>
+                                                    </div>
+                                                    <div class="flex space-x-1.5">
+                                                        <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                        <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-white bg-indigo-500 font-bold rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </template>
+                                            </template>
+                                            
+                                            <!-- 전화번호 2 -->
+                                            <template x-if="contact.phone2">
+                                                <div class="flex justify-between items-center py-0.5">
+                                                    <div class="flex items-center space-x-1.5">
+                                                        <span class="text-slate-400 font-semibold">전화2:</span>
+                                                        <span class="font-mono text-slate-800 font-bold" x-text="contact.phone2"></span>
+                                                    </div>
+                                                    <div class="flex space-x-1.5">
+                                                        <button @click="copyToClipboard(contact.phone2)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                        <a :href="'tel:' + contact.phone2" class="px-3 py-1 text-white bg-indigo-500 font-bold rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
+                                                    </div>
+                                                </div>
+                                            </template>
+
+                                            <!-- 팩스번호 -->
+                                            <template x-if="contact.fax">
+                                                <div class="flex justify-between items-center py-0.5">
+                                                    <div class="flex items-center space-x-1.5">
+                                                        <span class="text-slate-400 font-semibold">팩스:</span>
+                                                        <span class="font-mono text-slate-600" x-text="contact.fax"></span>
+                                                    </div>
+                                                    <button @click="copyToClipboard(contact.fax)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                </div>
+                                            </template>
+
+                                            <!-- 참고사항 메모 영역 -->
+                                            <template x-if="contact.notes">
+                                                <div class="pt-2 border-t border-dashed border-slate-200 text-slate-500 flex items-start space-x-1 text-[11px] leading-relaxed">
+                                                    <span class="text-amber-500 shrink-0">📌</span>
+                                                    <span x-text="contact.notes"></span>
+                                                </div>
+                                            </template>
+                                        </div>
                                     </div>
                                 </template>
                             </div>
@@ -462,9 +547,10 @@
                         const json = JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
                         const rows = json.table.rows;
                         
+                        // [보강완료] 전화번호2, 팩스번호, 참고사항까지 안정적으로 수집하도록 칼럼 매핑 확보
                         let colMap = {
                             category: 0, company: 1, sortOrder: 2, rank: 3, name: 4,
-                            phone1: 5, phone2: 6, fax: 7, holiday: 9, deleted: 12
+                            phone1: 5, phone2: 6, fax: 7, notes: 8, holiday: 9, deleted: 12
                         };
 
                         if (rows.length > 0) {
@@ -479,6 +565,7 @@
                                 else if (val.includes('전화번호1') || (val.includes('전화') && !val.includes('2'))) colMap.phone1 = idx;
                                 else if (val.includes('전화번호2')) colMap.phone2 = idx;
                                 else if (val.includes('팩스')) colMap.fax = idx;
+                                else if (val.includes('참고')) colMap.notes = idx;
                                 else if (val.includes('휴무')) colMap.holiday = idx;
                                 else if (val.includes('삭제')) colMap.deleted = idx;
                             });
@@ -503,6 +590,7 @@
                                 phone1: getVal(colMap.phone1), 
                                 phone2: getVal(colMap.phone2), 
                                 fax: getVal(colMap.fax), 
+                                notes: getVal(colMap.notes), // 참고사항 파싱 데이터 활성화
                                 holiday: getVal(colMap.holiday).toUpperCase() === 'Y' || getVal(colMap.holiday) === '예'
                             });
                         });
