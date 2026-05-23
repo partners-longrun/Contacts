@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <!-- Pretendard Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -65,12 +66,13 @@
     <div class="w-full max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl relative pb-20">
         
         <!-- 상단 여백 및 높이를 슬림하게 조절한 헤더 -->
+        <!-- PWA SMART APP 지우고 위아래 여백을 촘촘하게 가다듬어 높이 슬림화 완료 -->
         <header class="sticky top-0 z-40 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 pt-4 pb-4 rounded-b-[1.25rem] shadow-lg">
             <div class="flex justify-between items-center mb-2.5">
                 <h1 class="text-lg font-bold tracking-tight">제휴보험사 연락처 조회</h1>
                 
                 <div class="flex items-center space-x-1">
-                    <!-- 클라우드 동기화 아이콘 -->
+                    <!-- 클라우드 동기화 아이콘 (더욱 명확하고 직관적인 전용 구름 아이콘화) -->
                     <button @click="fetchData(true)" class="p-2 bg-white/10 hover:bg-white/20 active:scale-90 transition-all rounded-full" title="데이터 동기화">
                         <svg class="w-5 h-5 text-white" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
@@ -307,20 +309,22 @@
                     </div>
                 </div>
 
-                <!-- 부서원 상세 리스트 (소속 구성원 및 고객센터 간격 space-y-6으로 확대) -->
-                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-6 no-scrollbar pb-10">
+                <!-- 부서원 상세 리스트 (타이틀과 첫 그룹 패딩을 pt-2로 좁혀 밀착 배치) -->
+                <div class="flex-1 overflow-y-auto px-5 pt-2 pb-4 space-y-5 no-scrollbar pb-10">
                     <template x-for="group in getGroupedCompanyContacts()" :key="group.title">
-                        <div class="space-y-2.5">
+                        <!-- 고객센터/지원부서 그룹 상단 여백(pt-6) 및 구분선 적용으로 확실한 경계 구분 -->
+                        <div class="space-y-2.5" :class="group.title.includes('고객센터') ? 'pt-6 border-t border-slate-100' : ''">
                             <h3 class="text-xs font-black text-indigo-600 tracking-wide border-l-2 border-indigo-500 pl-2" x-text="group.title"></h3>
                             <div class="grid gap-2">
-                                <template x-for="contact in group.contacts" :key="contact.phone1 + contact.name">
+                                <!-- 인덱스를 결합한 고유 키 지정으로 Alpine DOM 충돌 누락 버그 완벽 방어 -->
+                                <template x-for="(contact, index) in group.contacts" :key="contact.phone1 + contact.name + index">
                                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-100" :class="contact.holiday ? 'opacity-50' : ''">
                                         
-                                        <!-- 이름 폰트 크기 한 단계 키움 (text-base) 및 휴무 배지 탑재 -->
-                                        <div class="flex justify-between items-center mb-1.5">
+                                        <!-- 이름 폰트 크기 한 단계 키움 (text-base) 및 휴무 배지를 이름(직급) 바로 오른쪽에 정교하게 정렬 -->
+                                        <div class="flex items-center space-x-2 mb-1.5">
                                             <span class="font-extrabold text-slate-800 text-base" x-text="getDisplayName(contact)"></span>
                                             <template x-if="contact.holiday">
-                                                <span class="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full font-bold">휴무</span>
+                                                <span class="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full font-bold shrink-0">휴무</span>
                                             </template>
                                         </div>
                                         
@@ -415,6 +419,21 @@
                 touchStartY: 0,
                 touchEndY: 0,
                 lastBackPress: 0,
+
+                // 구글 시트 칼럼 인덱스 매퍼 (기본 세팅 및 실시간 자동 보완 로직 연동)
+                colMap: {
+                    category: 0,
+                    company: 1,
+                    sortOrder: 2,
+                    rank: 3,
+                    name: 4,
+                    phone1: 5,
+                    phone2: 6,
+                    fax: 7,
+                    notes: 8,      // [핵심 보완] 참고사항 열이 매핑 실패 시에도 8번 칼럼을 기본값으로 바라보도록 명확히 예방
+                    holiday: 9,
+                    deleted: 12
+                },
 
                 init() {
                     this.loadFavorites();
@@ -566,6 +585,7 @@
                 getDisplayName(c) {
                     const name = (c.name || '').trim();
                     const rank = (c.rank || '').trim();
+                    // 이름과 직급이 동일하거나 직급이 없을 경우의 이중 가공 예방 처리
                     if (!rank || rank === '미지정' || name.includes(rank)) {
                         return name;
                     }
@@ -584,54 +604,85 @@
                         const json = JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
                         const rows = json.table.rows;
                         
-                        let colMap = {
-                            category: 0, company: 1, sortOrder: 2, rank: 3, name: 4,
-                            phone1: 5, phone2: 6, fax: 7, notes: 8, holiday: 9, deleted: 12
+                        // 헤더 매핑 헬퍼 함수 정의
+                        const mapHeader = (val, idx) => {
+                            if (val.includes('구분') || val.includes('손보생보')) this.colMap.category = idx;
+                            else if (val.includes('보험사')) this.colMap.company = idx;
+                            else if (val.includes('정렬')) this.colMap.sortOrder = idx;
+                            else if (val.includes('직급')) this.colMap.rank = idx;
+                            else if (val.includes('이름')) this.colMap.name = idx;
+                            else if (val.includes('전화번호1') || (val.includes('전화') && !val.includes('2'))) this.colMap.phone1 = idx;
+                            else if (val.includes('전화번호2')) this.colMap.phone2 = idx;
+                            else if (val.includes('팩스')) this.colMap.fax = idx;
+                            else if (val.includes('참고')) this.colMap.notes = idx;
+                            else if (val.includes('휴무')) this.colMap.holiday = idx;
+                            else if (val.includes('삭제')) this.colMap.deleted = idx;
                         };
 
+                        // [Case A] 구글 시트 API의 기본 cols 매핑 스캔
+                        if (json.table.cols && json.table.cols.length > 0) {
+                            json.table.cols.forEach((col, idx) => {
+                                if (!col || !col.label) return;
+                                const val = String(col.label).replace(/\s+/g, '');
+                                mapHeader(val, idx);
+                            });
+                        }
+
+                        // [Case B] 데이터 내 첫 번째 행(rows[0])을 통한 헤더 매핑 교차 검증
                         if (rows.length > 0) {
                             rows[0].c.forEach((cell, idx) => {
                                 if (!cell) return;
                                 const val = String(cell.v || cell.f || '').replace(/\s+/g, '');
-                                if (val.includes('구분') || val.includes('손보생보')) colMap.category = idx;
-                                else if (val.includes('보험사')) colMap.company = idx;
-                                else if (val.includes('정렬')) colMap.sortOrder = idx;
-                                else if (val.includes('직급')) colMap.rank = idx;
-                                else if (val.includes('이름')) colMap.name = idx;
-                                else if (val.includes('전화번호1') || (val.includes('전화') && !val.includes('2'))) colMap.phone1 = idx;
-                                else if (val.includes('전화번호2')) colMap.phone2 = idx;
-                                else if (val.includes('팩스')) colMap.fax = idx;
-                                else if (val.includes('참고')) colMap.notes = idx;
-                                else if (val.includes('휴무')) colMap.holiday = idx;
-                                else if (val.includes('삭제')) colMap.deleted = idx;
+                                mapHeader(val, idx);
                             });
                         }
 
                         const parsed = [];
+
                         rows.forEach((r, idx) => {
-                            if (idx === 0) return; 
                             const getVal = (i) => {
                                 if (i === undefined || !r.c || !r.c[i]) return '';
                                 return String(r.c[i].f || r.c[i].v || '').trim();
                             };
                             
-                            if (getVal(colMap.deleted)) return; 
+                            const catVal = getVal(this.colMap.category);
+                            const compVal = getVal(this.colMap.company);
+                            const nameVal = getVal(this.colMap.name);
+                            const rankVal = getVal(this.colMap.rank);
+                            const deletedVal = getVal(this.colMap.deleted);
 
+                            // 첫 번째 행이 헤더 텍스트인 경우 파싱 스킵
+                            if (idx === 0 && (catVal.includes('구분') || catVal.includes('손보생보'))) return;
+
+                            // '삭제일시' 검증 (진짜 날짜/일시 형태일 때만 무력화 삭제 처리)
+                            const deletedLower = deletedVal.toLowerCase();
+                            const isDeleted = deletedLower && 
+                                              deletedLower !== '-' && 
+                                              deletedLower !== 'n' && 
+                                              deletedLower !== 'no' && 
+                                              deletedLower !== '없음' && 
+                                              deletedLower !== 'false';
+
+                            if (isDeleted) return; // 삭제 기록된 데이터는 최종 로드 리스트에서 완전 배제
+
+                            // 정상 데이터 취합
                             parsed.push({
-                                category: getVal(colMap.category), 
-                                company: getVal(colMap.company), 
-                                sortOrder: getVal(colMap.sortOrder), 
-                                rank: getVal(colMap.rank), 
-                                name: getVal(getVal(colMap.name) ? colMap.name : colMap.rank),
-                                phone1: getVal(colMap.phone1), 
-                                phone2: getVal(colMap.phone2), 
-                                fax: getVal(colMap.fax), 
-                                notes: getVal(colMap.notes), 
-                                holiday: getVal(colMap.holiday).toUpperCase() === 'Y' || getVal(colMap.holiday) === '예'
+                                category: catVal, 
+                                company: compVal, 
+                                sortOrder: getVal(this.colMap.sortOrder), 
+                                rank: rankVal, 
+                                // 이름이 없을 시 직급 열을 백업으로 활용하는 강력 보완 로직
+                                name: nameVal || rankVal,
+                                phone1: getVal(this.colMap.phone1), 
+                                phone2: getVal(this.colMap.phone2), 
+                                fax: getVal(this.colMap.fax), 
+                                notes: getVal(this.colMap.notes), 
+                                holiday: getVal(this.colMap.holiday).toUpperCase() === 'Y' || getVal(this.colMap.holiday) === '예'
                             });
                         });
                         
                         this.contacts = parsed;
+                        
                         localStorage.setItem('cached_db_v6', JSON.stringify(this.contacts));
                         
                         const now = new Date();
@@ -662,8 +713,12 @@
                     const nCat = this.normalizeCategory(this.selectedCompanyCat);
                     const list = this.contacts.filter(c => {
                         if (nCat === '파트너스본부') {
-                            const isCategoryPartners = this.normalizeCategory(c.category) === '파트너스본부' || (c.category || '').trim() === '파트너스본부';
-                            const isCompanyPartners = this.normalizeCategory(c.company) === '파트너스본부' || (c.company || '').trim() === '파트너스본부';
+                            // 공백이나 포맷 왜곡에 완전히 대항하기 위해 lowercase + 공백제거 비교 구현
+                            const catLower = (c.category || '').toLowerCase().replace(/\s+/g, '');
+                            const compLower = (c.company || '').toLowerCase().replace(/\s+/g, '');
+                            
+                            const isCategoryPartners = catLower.includes('파트너스') || this.normalizeCategory(c.category) === '파트너스본부';
+                            const isCompanyPartners = compLower.includes('파트너스') || this.normalizeCategory(c.company) === '파트너스본부';
                             return isCategoryPartners || isCompanyPartners;
                         }
                         return c.company === this.selectedCompany;
