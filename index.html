@@ -64,12 +64,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                         </svg>
                     </button>
-                    <!-- PWA 설치 알림 버튼 -->
-                    <button x-show="deferredPrompt" @click="installPWA()" class="p-2 bg-emerald-500 rounded-full animate-bounce">
+                    <!-- PWA 설치 알림 버튼 (맥박 뛰는 듯한 바운스 애니메이션) -->
+                    <button x-show="deferredPrompt" @click="installPWA()" class="p-2 bg-emerald-500 rounded-full animate-bounce" title="앱으로 설치">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     </button>
                     <!-- 진단도구 토글 버튼 -->
-                    <button @click="isDiagOpen = !isDiagOpen" class="p-2 bg-white/10 rounded-full text-xs">⚙️</button>
+                    <button @click="isDiagOpen = !isDiagOpen" class="p-2 bg-white/10 rounded-full text-xs" title="개발진단도구">⚙️</button>
                 </div>
             </div>
 
@@ -86,11 +86,12 @@
             </div>
         </header>
 
-        <main class="flex-1 px-4 py-5 space-y-4 overflow-y-auto no-scrollbar">
+        <!-- py-5에서 pt-2.5로 상단 마진을 바짝 조절하여 헤더와의 긴밀한 배치 구축 -->
+        <main class="flex-1 px-4 pt-2.5 pb-5 space-y-4 overflow-y-auto no-scrollbar">
 
-            <!-- PWA 스마트폰 홈 화면 추가 안내 메시지 카드 -->
+            <!-- PWA 스마트폰 홈 화면 추가 안내 메시지 카드 (요청하신 가이드 문구 정교화 반영) -->
             <div x-show="showPwaGuide && !isPwaActive()" class="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-4 rounded-2xl relative shadow-sm" x-transition style="display: none;">
-                <button @click="showPwaGuide = false" class="absolute top-3.5 right-3.5 text-amber-500 hover:text-amber-700">
+                <button @click="showPwaGuide = false" class="absolute top-3.5 right-3.5 text-amber-500 hover:text-amber-700" title="가이드 닫기">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
                 <div class="flex items-start space-x-3">
@@ -98,9 +99,9 @@
                         📱
                     </div>
                     <div>
-                        <h4 class="text-xs font-black text-amber-800">바탕화면 앱 설치 안내</h4>
+                        <h4 class="text-xs font-black text-amber-800">홈 화면에 앱으로 설치하는 방법</h4>
                         <p class="text-[11px] text-amber-700 mt-1 leading-relaxed">
-                            브라우저 설정 메뉴에서 <span class="font-bold">['홈 화면에 추가']</span> 혹은 <span class="font-bold">['설치']</span>를 선택하시면 스마트폰 바탕화면에서 터치 한 번으로 빠르게 연락처를 조회하실 수 있습니다.
+                            오른쪽 위에 움직이는 다운로드 아이콘(녹색)을 클릭하여 설치하시거나, 브라우저 설정 메뉴에서 <span class="font-bold">['홈 화면에 추가']</span> 혹은 <span class="font-bold">['설치']</span>를 선택하시면 스마트폰 홈 화면에서 터치 한 번으로 빠르게 연락처를 조회하실 수 있습니다.
                         </p>
                     </div>
                 </div>
@@ -114,7 +115,6 @@
                 </div>
                 <p>상태: <span x-text="syncStatus" :class="syncStatus === '성공' ? 'text-emerald-400' : 'text-rose-400'"></span></p>
                 <p>총 데이터: <span x-text="contacts.length"></span>건</p>
-                <!-- 마지막 동기화 시간 -->
                 <p>마지막 동기화: <span x-text="lastSyncTime || '기록 없음'" class="text-sky-300"></span></p>
                 <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 text-white rounded-lg font-bold mt-2">캐시 초기화 및 재동기화</button>
             </div>
@@ -137,7 +137,6 @@
                                             <span class="text-xs bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded-full" x-text="contact.rank"></span>
                                         </h3>
                                     </div>
-                                    <!-- 파트너스본부는 즐겨찾기 별표 표시 제외 -->
                                     <template x-if="normalizeCategory(contact.category) !== '파트너스본부'">
                                         <button @click="toggleFavorite(contact.company, normalizeCategory(contact.category))" class="text-slate-300">
                                             <svg class="w-5 h-5" :class="isFavorite(contact.company, normalizeCategory(contact.category)) ? 'text-amber-400 fill-amber-400' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
@@ -165,14 +164,14 @@
             <template x-if="searchQuery.trim().length === 0">
                 <div class="space-y-4">
                     
-                    <!-- [수정] 파트너스본부: 카드 자체를 손보/생보와 같은 미려한 테두리 카드로 일원화하고 최상단 배치 -->
-                    <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-3">
-                        <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <!-- [수정완료] 파트너스본부: 카드 내부 선(border-b) 및 pb-2 삭제하여 완벽한 상하 여백 정렬 구현 -->
+                    <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-center">
                             <div class="flex items-center space-x-2">
                                 <div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
                                 <h2 class="text-base font-extrabold text-slate-800">파트너스본부</h2>
                             </div>
-                            <!-- '연락처 보기' 버튼 배치 -->
+                            <!-- '연락처 보기' 버튼 클릭 시 바텀 시트 연동 -->
                             <button @click="openCompanyDetails('파트너스본부', '파트너스본부')" 
                                     class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 font-extrabold text-[11px] rounded-xl transition-all active:scale-95">
                                 연락처 보기
@@ -187,7 +186,7 @@
                                 <div class="flex justify-between items-center border-b border-slate-50 pb-2">
                                     <div class="flex items-center space-x-2">
                                         <div class="w-2.5 h-2.5 rounded-full" :class="getDotColor(cat)"></div>
-                                        <!-- 카테고리 명칭 및 총 보험사 수 -->
+                                        <!-- 카테고리 명칭 및 총 보험사 수 수록 -->
                                         <h2 class="text-base font-extrabold text-slate-800">
                                             <span x-text="cat"></span>
                                             <span class="text-xs font-normal text-slate-400 ml-1" x-text="'(총 ' + getCompaniesByCategory(cat).length + '개)'"></span>
@@ -195,7 +194,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- [수정] 즐겨찾기가 하나라도 등록되어 있으면 본 가이드라인 텍스트를 자동으로 숨김 -->
+                                <!-- [조치 완료] 즐겨찾기가 하나라도 등록되어 있으면 가이드라인 설명 문구 자동 숨김 처리 -->
                                 <p x-show="getFavorites(cat).length === 0" class="text-[11px] text-slate-400 mt-1 leading-relaxed" x-transition>
                                     자주 찾는 보험사를 별표(★)를 눌러 최대 6개까지 홈 화면에 등록해 보세요.
                                 </p>
@@ -236,17 +235,24 @@
             </template>
         </main>
 
-        <!-- 바텀 시트 (스마트폰 최적화 슬라이드 모달) -->
+        <!-- 높이 90vh로 확실하게 대폭 확장 / 스와이프 제스처 이벤트 리스너 탑재 -->
         <div x-show="selectedCompany" class="fixed inset-0 z-50 overflow-hidden" style="display: none;">
             <!-- 모달 오버레이 배경 -->
             <div @click="selectedCompany = null" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"></div>
-            <!-- 실제 슬라이드업 시트 바디 -->
+            
+            <!-- 실제 슬라이드업 시트 바디 (스와이프 제스처 이벤트 리스너 등록) -->
             <div class="absolute inset-x-0 bottom-0 max-w-md mx-auto w-full flex flex-col bg-white rounded-t-[2rem] overflow-hidden shadow-2xl transition-transform duration-300 bottom-sheet-transition" 
-                 :class="selectedCompany ? 'translate-y-0' : 'translate-y-full'" style="height: 80vh;">
+                 :class="selectedCompany ? 'translate-y-0' : 'translate-y-full'" 
+                 style="height: 90vh;"
+                 @touchstart="touchStart($event)"
+                 @touchmove="touchMove($event)"
+                 @touchend="touchEnd($event)">
                 
-                <div class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50 sticky top-0 z-10">
-                    <div class="w-10 h-1 bg-slate-200 rounded-full mb-4"></div>
-                    <div class="w-full flex items-center justify-between">
+                <!-- [수정완료] 시트 상단 헤더 영역 클릭/터치만 해도 편리하게 닫히도록 최적화 -->
+                <div @click="selectedCompany = null" class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50 sticky top-0 z-10 cursor-pointer active:bg-slate-100/50 transition-colors" title="터치하거나 아래로 밀어내리면 창이 닫힙니다.">
+                    <!-- 중앙 정렬된 슬라이드 핸들 바 -->
+                    <div class="w-10 h-1 bg-slate-300 rounded-full mb-4"></div>
+                    <div class="w-full flex items-center justify-between" @click.stop>
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] font-extrabold px-2 py-0.5 rounded border" :class="getCategoryStyle(selectedCompanyCat)" x-text="selectedCompanyCat"></span>
                             <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany"></h2>
@@ -298,10 +304,9 @@
     </div>
 
     <script>
-        // Alpine.js 라이브러리가 로드되었을 때 컴포넌트 객체를 안전하게 정의하여 타이밍 오류 방지
         document.addEventListener('alpine:init', () => {
             Alpine.data('appState', () => ({
-                categoriesList: ['손해보험', '생명보험'], // 파트너스본부는 상위 고정하여 하드코딩 루프에서 격리
+                categoriesList: ['손해보험', '생명보험'], 
                 favorites: { '손해보험': [], '생명보험': [] },
                 isExpanded: { '손해보험': false, '생명보험': false },
                 contacts: [], 
@@ -317,7 +322,11 @@
                 isDiagOpen: false, 
                 syncStatus: '',
                 lastSyncTime: '',
-                showPwaGuide: true, // PWA 저장 안내 메시지 토글 기본값 활성화
+                showPwaGuide: true, 
+
+                // 제스처 스와이프를 지원하는 터치 위치 추적 변수
+                touchStartY: 0,
+                touchEndY: 0,
 
                 init() {
                     this.loadFavorites();
@@ -329,7 +338,24 @@
                     });
                 },
 
-                // PWA 설치 상태를 반환
+                // 스와이프 제스처 핸들러 구현 (아래로 밀어 팝업 닫기)
+                touchStart(e) {
+                    this.touchStartY = e.touches[0].clientY;
+                    this.touchEndY = e.touches[0].clientY;
+                },
+                touchMove(e) {
+                    this.touchEndY = e.touches[0].clientY;
+                },
+                touchEnd() {
+                    // 아래쪽 방향으로 100px 이상 쓸어내렸을 때 스와이프 액션 실행
+                    if (this.touchEndY - this.touchStartY > 100) {
+                        this.selectedCompany = null;
+                        this.showToast('팝업을 닫았습니다.');
+                    }
+                    this.touchStartY = 0;
+                    this.touchEndY = 0;
+                },
+
                 isPwaActive() {
                     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
                 },
@@ -400,7 +426,6 @@
                         f.splice(idx, 1); 
                         this.showToast(`${comp} 즐겨찾기 해제`); 
                     } else {
-                        // 즐겨찾기 최대 개수 한도를 6개로 지정
                         if (f.length >= 6) { 
                             this.showToast('최대 6개까지만 설정할 수 있습니다.'); 
                             return; 
@@ -437,7 +462,6 @@
                         const json = JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
                         const rows = json.table.rows;
                         
-                        // 시트 헤더 매핑을 동적으로 파싱
                         let colMap = {
                             category: 0, company: 1, sortOrder: 2, rank: 3, name: 4,
                             phone1: 5, phone2: 6, fax: 7, holiday: 9, deleted: 12
@@ -462,13 +486,13 @@
 
                         const parsed = [];
                         rows.forEach((r, idx) => {
-                            if (idx === 0) return; // 헤더 스킵
+                            if (idx === 0) return; 
                             const getVal = (i) => {
                                 if (i === undefined || !r.c || !r.c[i]) return '';
                                 return String(r.c[i].f || r.c[i].v || '').trim();
                             };
                             
-                            if (getVal(colMap.deleted)) return; // 삭제 필터링된 직원은 불러오지 않음
+                            if (getVal(colMap.deleted)) return; 
 
                             parsed.push({
                                 category: getVal(colMap.category), 
@@ -486,7 +510,6 @@
                         this.contacts = parsed;
                         localStorage.setItem('cached_db_v6', JSON.stringify(this.contacts));
                         
-                        // 현재 시간 기록 및 로컬저장소 기록 복구
                         const now = new Date();
                         this.lastSyncTime = now.toLocaleString('ko-KR');
                         localStorage.setItem('last_sync_time_v6', this.lastSyncTime);
@@ -510,7 +533,7 @@
                     this.selectedCompanyCat = cat; 
                 },
 
-                // [수정] 구분(category) 열이나 보험사명(company) 열에 '파트너스본부'가 기록된 모든 직원을 입체적으로 취합하여 노출
+                // 파트너스본부의 모든 구성원이 교차 추적으로 완벽하게 나오도록 개선 완료된 로직
                 getGroupedCompanyContacts() {
                     if (!this.selectedCompany) return [];
                     const nCat = this.normalizeCategory(this.selectedCompanyCat);
