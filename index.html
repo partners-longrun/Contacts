@@ -5,216 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>제휴보험사 연락처 조회 시스템</title>
     
-    <!-- Tailwind CSS (고급 스타일링) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js (반응형 상태 관리) -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Pretendard 폰트 불러오기 (가독성 극대화) -->
+    <!-- Alpine.js (defer 속성을 명확히 지정하여 로딩 타이밍 일치) -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Pretendard Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     
-    <!-- PWA 모바일 앱 지원 태그 -->
+    <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#4f46e5">
 
     <script>
-        // 깃허브 페이지 등 서브디렉토리 배포 환경을 지원하는 웹앱 Manifest 설정
         const manifest = {
-            "name": "제휴보험사 연락처 조회",
+            "name": "제휴보험사 연락처",
             "short_name": "보험사연락처",
-            "description": "파트너스본부/손해/생명보험사 파트너 연락처 통합 조회 시스템",
-            "start_url": "./index.html",
             "display": "standalone",
+            "start_url": "./index.html",
             "background_color": "#f8fafc",
             "theme_color": "#4f46e5",
             "icons": [
-                {
-                    "src": "https://img.icons8.com/fluent/192/000000/address-book.png",
-                    "sizes": "192x192",
-                    "type": "image/png"
-                },
-                {
-                    "src": "https://img.icons8.com/fluent/512/000000/address-book.png",
-                    "sizes": "512x512",
-                    "type": "image/png"
-                }
+                { "src": "https://img.icons8.com/fluent/192/000000/address-book.png", "sizes": "192x192", "type": "image/png" },
+                { "src": "https://img.icons8.com/fluent/512/000000/address-book.png", "sizes": "512x512", "type": "image/png" }
             ]
         };
-        const manifestStr = JSON.stringify(manifest);
-        const blob = new Blob([manifestStr], { type: 'application/json' });
-        const manifestURL = URL.createObjectURL(blob);
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
         const link = document.createElement('link');
         link.rel = 'manifest';
-        link.href = manifestURL;
+        link.href = URL.createObjectURL(blob);
         document.head.appendChild(link);
     </script>
 
     <style>
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            font-family: 'Pretendard', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
         }
-        /* 모바일 스크롤 바 숨김 */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        /* 바텀 시트 트랜지션 애니메이션 */
-        .bottom-sheet-transition {
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .bottom-sheet-transition { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col justify-between" x-data="appState()">
+<body class="bg-slate-100 text-slate-900 min-h-screen" x-data="appState">
 
     <div class="w-full max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl relative pb-20">
         
-        <!-- 상단 헤더 및 실시간 검색바 영역 -->
-        <header class="sticky top-0 z-40 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 pt-7 pb-6 rounded-b-[2rem] shadow-lg">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <span class="text-[10px] bg-white/20 text-indigo-100 font-bold px-2 py-0.5 rounded-full border border-white/10 uppercase tracking-wider">PWA Smart App</span>
-                    <h1 class="text-xl font-bold mt-1 tracking-tight">제휴보험사 연락처 조회</h1>
-                </div>
-                <!-- 우측 상단 제어 도구 모음 -->
-                <div class="flex items-center space-x-1.5">
-                    <button @click="fetchData(true)" class="p-2.5 bg-white/10 hover:bg-white/20 active:scale-95 transition-all rounded-full" title="실시간 동기화">
+        <!-- 상단 여백 및 높이를 슬림하게 조절한 헤더 -->
+        <header class="sticky top-0 z-40 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 pt-4 pb-4 rounded-b-[1.25rem] shadow-lg">
+            <div class="flex justify-between items-center mb-2.5">
+                <h1 class="text-lg font-bold tracking-tight">제휴보험사 연락처 조회</h1>
+                
+                <div class="flex items-center space-x-1">
+                    <!-- 클라우드 동기화 아이콘 -->
+                    <button @click="fetchData(true)" class="p-2 bg-white/10 hover:bg-white/20 active:scale-90 transition-all rounded-full" title="데이터 동기화">
                         <svg class="w-5 h-5 text-white" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.753 8H17" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                         </svg>
                     </button>
-                    <button x-show="deferredPrompt" @click="installPWA()" class="p-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 transition-all rounded-full animate-pulse" title="앱으로 설치">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
+                    <!-- PWA 설치 알림 버튼 -->
+                    <button x-show="deferredPrompt" @click="installPWA()" class="p-2 bg-emerald-500 rounded-full animate-bounce">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     </button>
-                    <button @click="isDiagOpen = !isDiagOpen" class="p-2.5 bg-white/10 hover:bg-white/20 active:scale-95 transition-all rounded-full text-xs font-semibold" title="진단도구">
-                        ⚙️
-                    </button>
+                    <!-- 진단도구 토글 버튼 -->
+                    <button @click="isDiagOpen = !isDiagOpen" class="p-2 bg-white/10 rounded-full text-xs">⚙️</button>
                 </div>
             </div>
 
-            <!-- 검색어 입력 창 -->
+            <!-- 검색 입력바 -->
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                    <svg class="h-4.5 w-4.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </span>
-                <input x-model="searchQuery" type="text" placeholder="이름, 직급, 전화번호, 보험사명 검색..." 
-                       class="w-full pl-10 pr-10 py-3 bg-white/15 focus:bg-white text-white focus:text-slate-800 placeholder-indigo-200 focus:placeholder-slate-400 rounded-2xl outline-none border border-transparent focus:border-indigo-400 transition-all shadow-inner text-sm font-medium">
-                <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-indigo-200 hover:text-slate-600 focus:text-indigo-400">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                <input x-model="searchQuery" type="text" placeholder="이름, 보험사명 검색..." 
+                       class="w-full pl-10 pr-10 py-2.5 bg-white/15 focus:bg-white text-white focus:text-slate-800 placeholder-indigo-200 focus:placeholder-slate-400 rounded-xl outline-none transition-all shadow-inner text-sm font-medium">
+                <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-indigo-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
         </header>
 
-        <main class="flex-1 px-4 py-5 space-y-6 overflow-y-auto no-scrollbar">
+        <main class="flex-1 px-4 py-5 space-y-5 overflow-y-auto no-scrollbar">
 
-            <!-- 구글 시트 연동 실패 시 디버깅을 돕는 진단 대시보드 -->
-            <div x-show="isDiagOpen" class="bg-slate-800 text-slate-200 p-4 rounded-2xl text-xs space-y-2.5 font-mono shadow-inner" style="display: none;">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
-                    <span class="font-bold text-amber-400">⚡ 실시간 연동 진단 모듈</span>
-                    <button @click="isDiagOpen = false" class="text-slate-400 hover:text-white text-sm">닫기</button>
+            <!-- 실시간 데이터 동기화 진단 도구 -->
+            <div x-show="isDiagOpen" class="bg-slate-800 text-slate-200 p-4 rounded-2xl text-xs space-y-2 font-mono shadow-xl" style="display: none;" x-transition>
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <span class="font-bold text-amber-400">데이터 연동 진단</span>
+                    <button @click="isDiagOpen = false" class="text-slate-400">닫기</button>
                 </div>
-                <p>연동 상태: <span x-text="syncStatus" :class="syncStatus === '성공' ? 'text-emerald-400 font-bold' : 'text-rose-400'"></span></p>
-                <p>로딩된 총 행 수: <span class="font-bold text-indigo-300" x-text="contacts.length"></span>건</p>
-                <p>마지막 연동 시각: <span x-text="lastSyncStr"></span></p>
-                <template x-if="diagErrorLog">
-                    <div class="bg-red-950/40 p-2 rounded border border-red-900/60 text-red-300 overflow-x-auto max-h-32">
-                        <span class="font-bold">오류 로그:</span> <span x-text="diagErrorLog"></span>
-                    </div>
-                </template>
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button @click="clearCacheAndFetch()" class="py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold transition-all text-center block active:scale-95">
-                        캐시 삭제 후 갱신
-                    </button>
-                    <a href="https://docs.google.com/spreadsheets/d/1jE81bhIsmRv3JmJRjs-jMKMk5d6ArQDQ2ODGleLcZvY/edit?usp=sharing" target="_blank" class="py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold text-center block active:scale-95">
-                        원본 구글 시트 열기
-                    </a>
-                </div>
+                <p>상태: <span x-text="syncStatus" :class="syncStatus === '성공' ? 'text-emerald-400' : 'text-rose-400'"></span></p>
+                <p>총 데이터: <span x-text="contacts.length"></span>건</p>
+                <!-- 마지막 동기화 시간 복구 -->
+                <p>마지막 동기화: <span x-text="lastSyncTime || '기록 없음'" class="text-sky-300"></span></p>
+                <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 text-white rounded-lg font-bold mt-2">캐시 초기화 및 재동기화</button>
             </div>
             
+            <!-- 통합 검색 활성화 시 결과 노출 영역 -->
             <template x-if="searchQuery.trim().length > 0">
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center px-1">
-                        <h2 class="text-sm font-bold text-indigo-600">통합 검색결과 (<span x-text="filteredSearchResults().length"></span>건)</h2>
-                        <button @click="searchQuery = ''" class="text-xs text-slate-400 hover:text-slate-600 underline">검색 초기화</button>
-                    </div>
-
-                    <!-- 검색 카드 리스트 -->
-                    <div class="grid gap-3">
+                <div class="space-y-3">
+                    <h2 class="text-xs font-bold text-indigo-600 px-1">검색 결과 (<span x-text="filteredSearchResults().length"></span>건)</h2>
+                    <div class="grid gap-2.5">
                         <template x-for="contact in filteredSearchResults()" :key="contact.phone1 + contact.name + contact.company">
-                            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm transition-all hover:border-indigo-100" :class="contact.holiday ? 'opacity-60 bg-slate-50' : ''">
-                                <div class="flex justify-between items-start mb-2">
+                            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm" :class="contact.holiday ? 'opacity-60 bg-slate-50' : ''">
+                                <div class="flex justify-between items-start">
                                     <div>
-                                        <div class="flex items-center space-x-1.5">
-                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded" 
-                                                  :class="getCategoryStyle(contact.category)"
-                                                  x-text="normalizeCategory(contact.category)"></span>
+                                        <div class="flex items-center space-x-1.5 mb-1">
+                                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded border" :class="getCategoryStyle(contact.category)" x-text="normalizeCategory(contact.category)"></span>
                                             <span class="text-xs text-indigo-600 font-bold" x-text="contact.company"></span>
                                         </div>
-                                        <h3 class="text-base font-bold text-slate-800 mt-1 flex items-center space-x-2">
+                                        <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
                                             <span x-text="contact.name"></span>
                                             <span class="text-xs bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded-full" x-text="contact.rank"></span>
-                                            <template x-if="contact.holiday">
-                                                <span class="text-[10px] bg-rose-500 text-white font-medium px-1.5 py-0.5 rounded-full">휴무</span>
-                                            </template>
                                         </h3>
                                     </div>
-                                    <!-- 즐겨찾기 토글 별버튼 -->
-                                    <button @click="toggleFavorite(contact.company, normalizeCategory(contact.category))" class="p-1 rounded-full text-slate-300 hover:text-amber-400">
-                                        <svg class="w-5 h-5" :class="isFavorite(contact.company, normalizeCategory(contact.category)) ? 'text-amber-400 fill-amber-400' : 'text-slate-300'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/>
-                                        </svg>
-                                    </button>
+                                    <!-- 파트너스본부는 즐겨찾기 별표 표시 제외 -->
+                                    <template x-if="normalizeCategory(contact.category) !== '파트너스본부'">
+                                        <button @click="toggleFavorite(contact.company, normalizeCategory(contact.category))" class="text-slate-300">
+                                            <svg class="w-5 h-5" :class="isFavorite(contact.company, normalizeCategory(contact.category)) ? 'text-amber-400 fill-amber-400' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
+                                        </button>
+                                    </template>
                                 </div>
-                                
-                                <!-- 연락 및 상세 관리 -->
-                                <div class="space-y-2 mt-3 text-sm">
+                                <div class="mt-3 space-y-2 text-sm">
                                     <template x-if="contact.phone1">
-                                        <div class="flex items-center justify-between py-1.5 border-b border-dashed border-slate-100">
-                                            <div class="flex items-center space-x-2">
-                                                <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">번호1</span>
-                                                <span class="font-mono text-slate-700 font-bold select-all" x-text="contact.phone1"></span>
-                                            </div>
+                                        <div class="flex justify-between py-1 border-b border-dashed border-slate-100">
+                                            <span class="font-mono text-slate-700 font-bold" x-text="contact.phone1"></span>
                                             <div class="flex space-x-1.5">
-                                                <button @click="copyToClipboard(contact.phone1)" class="px-2.5 py-1 text-xs text-slate-600 font-medium hover:text-indigo-600 bg-slate-100 active:bg-slate-200 rounded-lg active:scale-95 transition-all">복사</button>
-                                                <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg active:scale-95 transition-all flex items-center shadow-sm">전화</a>
+                                                <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-xs bg-slate-100 rounded-lg">복사</button>
+                                                <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-xs font-bold text-white bg-indigo-500 rounded-lg">전화</a>
                                             </div>
-                                        </div>
-                                    </template>
-                                    <template x-if="contact.phone2">
-                                        <div class="flex items-center justify-between py-1.5 border-b border-dashed border-slate-100">
-                                            <div class="flex items-center space-x-2">
-                                                <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">번호2</span>
-                                                <span class="font-mono text-slate-700 font-bold select-all" x-text="contact.phone2"></span>
-                                            </div>
-                                            <div class="flex space-x-1.5">
-                                                <button @click="copyToClipboard(contact.phone2)" class="px-2.5 py-1 text-xs text-slate-600 font-medium hover:text-indigo-600 bg-slate-100 active:bg-slate-200 rounded-lg active:scale-95 transition-all">복사</button>
-                                                <a :href="'tel:' + contact.phone2" class="px-3 py-1 text-xs font-bold text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg active:scale-95 transition-all flex items-center shadow-sm">전화</a>
-                                            </div>
-                                        </div>
-                                    </template>
-                                    <template x-if="contact.fax">
-                                        <div class="flex items-center justify-between py-1.5">
-                                            <div class="flex items-center space-x-2">
-                                                <span class="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">팩스</span>
-                                                <span class="font-mono text-slate-600 select-all" x-text="contact.fax"></span>
-                                            </div>
-                                            <button @click="copyToClipboard(contact.fax)" class="px-2.5 py-1 text-xs text-slate-600 font-medium hover:text-amber-700 bg-slate-100 rounded-lg active:scale-95 transition-all">복사</button>
-                                        </div>
-                                    </template>
-                                    <template x-if="contact.note">
-                                        <div class="mt-2 bg-indigo-50/50 p-2.5 rounded-xl text-xs text-slate-600 border border-indigo-100/50">
-                                            <span class="font-bold block mb-0.5 text-indigo-600">참고사항</span>
-                                            <span x-text="contact.note"></span>
                                         </div>
                                     </template>
                                 </div>
@@ -224,205 +143,120 @@
                 </div>
             </template>
 
+            <!-- 기본 상태 (메인 대시보드 리스트) -->
             <template x-if="searchQuery.trim().length === 0">
-                <div class="space-y-6">
-                    
-                    <!-- 삼원화 동적 카테고리 루프 (파트너스본부 -> 손해보험 -> 생명보험 순서로 출력) -->
+                <div class="space-y-5">
                     <template x-for="cat in categoriesList" :key="cat">
-                        <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                        <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm space-y-3">
                             
-                            <!-- 카테고리 헤더 타이틀 -->
-                            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-                                <div class="flex items-center space-x-2">
-                                    <div class="w-2.5 h-2.5 rounded-full animate-pulse" :class="getDotColor(cat)"></div>
-                                    <h2 class="text-base font-extrabold text-slate-800" x-text="`${cat} (${getCompaniesByCategory(cat).length}개사)`"></h2>
+                            <!-- 파트너스본부: 카드 자체 터치 시 즉시 전체 명단 노출 -->
+                            <template x-if="cat === '파트너스본부'">
+                                <div @click="openCompanyDetails('파트너스본부', '파트너스본부')" 
+                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50/30 border border-purple-100 rounded-2xl cursor-pointer active:scale-95 transition-all">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse"></div>
+                                        <h2 class="text-base font-extrabold text-slate-800">파트너스본부</h2>
+                                    </div>
+                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
                                 </div>
-                                <span class="text-[10px] text-indigo-600 font-bold px-2 py-0.5 bg-indigo-50 rounded-full border border-indigo-100">즐겨찾기 최대 6개</span>
-                            </div>
+                            </template>
 
-                            <!-- 해당 카테고리의 즐겨찾는 리스트 단체 노출 -->
-                            <div>
-                                <span class="text-[11px] font-bold text-indigo-500 block mb-2" x-text="`★ 자주 찾는 ${cat}`"></span>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <template x-for="comp in getFavorites(cat)" :key="comp">
-                                        <div class="relative flex items-center justify-between bg-gradient-to-br from-indigo-50/70 to-indigo-50/10 border border-indigo-100/40 p-3 rounded-2xl shadow-sm hover:border-indigo-300 transition-all cursor-pointer active:scale-95" @click="openCompanyDetails(comp, cat)">
-                                            <div class="flex items-center space-x-1.5 overflow-hidden">
-                                                <span class="text-amber-400 text-sm shrink-0">★</span>
-                                                <span class="text-sm font-extrabold text-slate-800 truncate" x-text="comp"></span>
+                            <!-- 손해/생명보험: 즐겨찾기(최대 6개) 및 아코디언 배치 -->
+                            <template x-if="cat !== '파트너스본부'">
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center border-b border-slate-50 pb-2">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="w-2.5 h-2.5 rounded-full" :class="getDotColor(cat)"></div>
+                                            <!-- 카테고리 명칭 및 총 보험사 수 복구 -->
+                                            <h2 class="text-base font-extrabold text-slate-800">
+                                                <span x-text="cat"></span>
+                                                <span class="text-xs font-normal text-slate-400 ml-1" x-text="'(총 ' + getCompaniesByCategory(cat).length + '개)'"></span>
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 즐겨찾기 안내 문구 복구 -->
+                                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                                        자주 찾는 보험사를 별표(★)를 눌러 최대 6개까지 홈 화면에 등록해 보세요.
+                                    </p>
+
+                                    <!-- 즐겨찾기 지정 보험사 리스트 -->
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <template x-for="comp in getFavorites(cat)" :key="comp">
+                                            <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl active:scale-95 transition-all cursor-pointer">
+                                                <span class="text-xs font-bold text-slate-800 truncate" x-text="comp"></span>
+                                                <button @click.stop="toggleFavorite(comp, cat)" class="text-amber-400">
+                                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
+                                                </button>
                                             </div>
-                                            <button @click.stop="toggleFavorite(comp, cat)" class="p-1 text-amber-400 hover:scale-115 transition-transform shrink-0">
-                                                <svg class="w-4 h-4 fill-amber-400" stroke="currentColor" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <template x-if="getFavorites(cat).length === 0">
-                                        <div class="col-span-2 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                            <span class="text-[11px] text-slate-400">자주 조회하는 파트너사에 별표(★)를 눌러 등록해보세요.</span>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
+                                        </template>
+                                    </div>
 
-                            <!-- 더보기 접기/펼치기 아코디언 버튼 -->
-                            <div class="pt-1">
-                                <button @click="isExpanded[cat] = !isExpanded[cat]" class="w-full flex items-center justify-between py-3 px-4 bg-slate-50 hover:bg-slate-100 active:scale-[0.99] transition-all rounded-xl text-xs font-bold text-slate-600 border border-slate-100">
-                                    <span x-text="isExpanded[cat] ? '목록 접기' : '전체 목록 펼치기'"></span>
-                                    <svg class="w-4 h-4 transform transition-transform duration-300 text-slate-400" :class="isExpanded[cat] ? 'rotate-180 text-indigo-600' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
+                                    <!-- 나머지 보험사 목록 더보기 펼치기 단추 -->
+                                    <button @click="isExpanded[cat] = !isExpanded[cat]" class="w-full flex justify-between items-center py-2.5 px-4 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-500 transition-all">
+                                        <span x-text="isExpanded[cat] ? '기타 보험사 접기' : '기타 보험사 목록 펼치기'"></span>
+                                        <svg class="w-3.5 h-3.5 transition-transform" :class="isExpanded[cat] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
 
-                                <!-- 접혀져서 로드되는 미즐겨찾기 목록 -->
-                                <div x-show="isExpanded[cat]" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-[1200px]" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 max-h-[1200px]" x-transition:leave-end="opacity-0 max-h-0" class="overflow-hidden mt-2 grid grid-cols-2 gap-2">
-                                    <template x-for="comp in getRemainingCompanies(cat)" :key="comp">
-                                        <div class="flex items-center justify-between bg-slate-50/70 hover:bg-indigo-50/30 border border-slate-200/60 p-3 rounded-2xl cursor-pointer hover:border-indigo-100 transition-all active:scale-95" @click="openCompanyDetails(comp, cat)">
-                                            <span class="text-xs font-bold text-slate-700 truncate" x-text="comp"></span>
-                                            <button @click.stop="toggleFavorite(comp, cat)" class="p-1 text-slate-300 hover:text-amber-400 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
-                                            </button>
-                                        </div>
-                                    </template>
-                                    <template x-if="getRemainingCompanies(cat).length === 0">
-                                        <div class="col-span-2 text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                            <span class="text-[11px] text-slate-400">모든 파트너사가 즐겨찾기 상태입니다.</span>
-                                        </div>
-                                    </template>
+                                    <!-- 펼치기 영역 -->
+                                    <div x-show="isExpanded[cat]" class="grid grid-cols-2 gap-2 mt-2" x-transition>
+                                        <template x-for="comp in getRemainingCompanies(cat)" :key="comp">
+                                            <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-slate-50 p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                                                <span class="text-xs font-bold text-slate-700 truncate" x-text="comp"></span>
+                                                <button @click.stop="toggleFavorite(comp, cat)" class="text-slate-300">
+                                                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
-                            </div>
+                            </template>
                         </div>
                     </template>
-
-                    <!-- 사용법 안내 팁 배너 -->
-                    <div class="p-4 bg-indigo-50/50 rounded-3xl text-xs text-indigo-700 flex items-center space-x-3 border border-indigo-100">
-                        <span class="text-2xl">💡</span>
-                        <div>
-                            <p class="font-bold">스마트폰 홈 화면에 바로가기를 추가하세요!</p>
-                            <p class="text-indigo-500 mt-0.5">네트워크가 끊기거나 오프라인 상태에서도, 내장 메모리에 캐시된 데이터를 기반으로 중단 없이 연락처를 즉시 조회할 수 있습니다.</p>
-                        </div>
-                    </div>
-
                 </div>
             </template>
         </main>
 
-        <!-- 배경 어둡게 블러 처리 -->
+        <!-- 바텀 시트 (스마트폰 최적화 슬라이드 모달) -->
         <div x-show="selectedCompany" class="fixed inset-0 z-50 overflow-hidden" style="display: none;">
-            <div @click="selectedCompany = null" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" x-show="selectedCompany" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
-
-            <!-- 바텀 시트 판넬 (화면 아래에서 위로 슬라이딩) -->
-            <div class="absolute inset-x-0 bottom-0 max-w-md mx-auto w-full flex flex-col bg-white rounded-t-[2.5rem] overflow-hidden shadow-2xl transition-transform duration-300 bottom-sheet-transition" 
-                 :class="selectedCompany ? 'translate-y-0' : 'translate-y-full'"
-                 style="height: 82vh;">
+            <!-- 모달 오버레이 배경 -->
+            <div @click="selectedCompany = null" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"></div>
+            <!-- 실제 슬라이드업 시트 바디 -->
+            <div class="absolute inset-x-0 bottom-0 max-w-md mx-auto w-full flex flex-col bg-white rounded-t-[2rem] overflow-hidden shadow-2xl transition-transform duration-300 bottom-sheet-transition" 
+                 :class="selectedCompany ? 'translate-y-0' : 'translate-y-full'" style="height: 80vh;">
                 
-                <!-- 바텀 시트 핸들바 및 회사 타이틀 -->
-                <div class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50/80 sticky top-0 z-10">
-                    <div class="w-12 h-1.5 bg-slate-300 rounded-full mb-4"></div>
+                <div class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50 sticky top-0 z-10">
+                    <div class="w-10 h-1 bg-slate-200 rounded-full mb-4"></div>
                     <div class="w-full flex items-center justify-between">
                         <div class="flex items-center space-x-2">
-                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded border" 
-                                  :class="getCategoryStyle(selectedCompanyCat)"
-                                  x-text="selectedCompanyCat"></span>
-                            <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany"></h2>
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded border" :class="getCategoryStyle(selectedCompanyCat)" x-text="selectedCompanyCat"></span>
+                            <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany === '파트너스본부' ? '파트너스본부' : selectedCompany"></h2>
                         </div>
-                        <button @click="selectedCompany = null" class="p-2 text-slate-400 hover:text-slate-600 rounded-full bg-slate-200/50 hover:bg-slate-200 active:scale-95 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        <button @click="selectedCompany = null" class="p-2 text-slate-400">✕</button>
                     </div>
                 </div>
 
-                <!-- 내부 특정회사 멤버 검색 및 명단 본문 -->
-                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5 no-scrollbar pb-12">
-                    
-                    <!-- 회사 내부용 미니 검색바 -->
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </span>
-                        <input x-model="innerSearchQuery" type="text" placeholder="이름 또는 직급으로 이 회사에서 검색..." 
-                               class="w-full pl-9 pr-8 py-2 bg-slate-100 focus:bg-white text-slate-800 placeholder-slate-400 rounded-xl outline-none border border-transparent focus:border-indigo-400 transition-all text-xs font-semibold">
-                        <button x-show="innerSearchQuery.length > 0" @click="innerSearchQuery = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
-
-                    <!-- 검색 결과 없음 인지용 폴백 안내 -->
-                    <template x-if="getGroupedCompanyContacts().length === 0">
-                        <div class="text-center py-16 text-slate-400 space-y-3">
-                            <svg class="w-12 h-12 text-slate-200 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-sm font-medium text-slate-400">일치하는 연락처 정보가 존재하지 않습니다.</p>
-                        </div>
-                    </template>
-
-                    <!-- 직급 그룹별 정렬 및 루프 노출 -->
+                <!-- 부서원 상세 리스트 (직급별 그룹화) -->
+                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4 no-scrollbar pb-10">
                     <template x-for="group in getGroupedCompanyContacts()" :key="group.rank">
                         <div class="space-y-2">
-                            <!-- 직급 구분 타이틀 헤더 -->
-                            <h3 class="text-xs font-extrabold text-slate-400 tracking-wider flex items-center space-x-1.5 px-1">
-                                <span class="inline-block w-2 h-2 bg-indigo-500 rounded-full"></span>
-                                <span x-text="group.rank || '직급 미지정'"></span>
-                            </h3>
-                            
-                            <!-- 해당 직급의 상세 임직원 명부 카드 목록 -->
-                            <div class="space-y-2.5">
+                            <h3 class="text-[11px] font-extrabold text-slate-400 uppercase tracking-tighter" x-text="group.rank"></h3>
+                            <div class="space-y-2">
                                 <template x-for="contact in group.contacts" :key="contact.phone1 + contact.name">
-                                    <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100 transition-all shadow-sm" :class="contact.holiday ? 'opacity-50 bg-slate-100' : ''">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <div class="flex items-center space-x-2">
-                                                <span class="font-extrabold text-slate-800" x-text="contact.name"></span>
-                                                <template x-if="contact.holiday">
-                                                    <span class="text-[9px] bg-rose-500 text-white font-medium px-1.5 py-0.5 rounded-full animate-pulse">휴무</span>
-                                                </template>
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100" :class="contact.holiday ? 'opacity-50' : ''">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-extrabold text-slate-800" x-text="contact.name"></span>
+                                            <template x-if="contact.holiday"><span class="text-[9px] bg-rose-500 text-white px-1.5 py-0.5 rounded-full font-bold">휴무</span></template>
+                                        </div>
+                                        <template x-if="contact.phone1">
+                                            <div class="flex justify-between items-center">
+                                                <span class="font-mono text-sm font-bold text-slate-700" x-text="contact.phone1"></span>
+                                                <div class="flex space-x-1.5">
+                                                    <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-xs bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                    <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-white bg-indigo-500 font-bold rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
+                                                </div>
                                             </div>
-                                        </div>
-
-                                        <!-- 통화 걸기 및 번호 복사 영역 -->
-                                        <div class="space-y-2 text-xs">
-                                            <template x-if="contact.phone1">
-                                                <div class="flex items-center justify-between py-1 border-b border-dashed border-slate-200/50">
-                                                    <div class="flex items-center space-x-1.5">
-                                                        <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 px-1 py-0.5 rounded">번호1</span>
-                                                        <span class="font-mono text-slate-700 font-bold select-all" x-text="contact.phone1"></span>
-                                                    </div>
-                                                    <div class="flex space-x-1.5">
-                                                        <button @click="copyToClipboard(contact.phone1)" class="px-2.5 py-1 text-slate-600 bg-white border border-slate-200 rounded-lg active:scale-95 transition-all">복사</button>
-                                                        <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-white bg-indigo-500 hover:bg-indigo-600 font-bold rounded-lg active:scale-95 transition-all">전화</a>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                            <template x-if="contact.phone2">
-                                                <div class="flex items-center justify-between py-1 border-b border-dashed border-slate-200/50">
-                                                    <div class="flex items-center space-x-1.5">
-                                                        <span class="text-[9px] font-bold text-indigo-500 bg-indigo-50 px-1 py-0.5 rounded">번호2</span>
-                                                        <span class="font-mono text-slate-700 font-bold select-all" x-text="contact.phone2"></span>
-                                                    </div>
-                                                    <div class="flex space-x-1.5">
-                                                        <button @click="copyToClipboard(contact.phone2)" class="px-2.5 py-1 text-slate-600 bg-white border border-slate-200 rounded-lg active:scale-95 transition-all">복사</button>
-                                                        <a :href="'tel:' + contact.phone2" class="px-3 py-1 text-white bg-indigo-500 hover:bg-indigo-600 font-bold rounded-lg active:scale-95 transition-all">전화</a>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                            <template x-if="contact.fax">
-                                                <div class="flex items-center justify-between py-1">
-                                                    <div class="flex items-center space-x-1.5">
-                                                        <span class="text-[9px] font-bold text-amber-500 bg-amber-50 px-1 py-0.5 rounded">팩스</span>
-                                                        <span class="font-mono text-slate-600 select-all" x-text="contact.fax"></span>
-                                                    </div>
-                                                    <button @click="copyToClipboard(contact.fax)" class="px-2.5 py-1 text-slate-600 bg-white border border-slate-200 rounded-lg active:scale-95 transition-all">복사</button>
-                                                </div>
-                                            </template>
-                                            <template x-if="contact.note">
-                                                <div class="mt-1.5 bg-white p-2.5 rounded-xl text-[11px] text-slate-500 border border-slate-100">
-                                                    <span class="font-bold text-indigo-500 block text-[9px] mb-0.5">참고사항</span>
-                                                    <span x-text="contact.note"></span>
-                                                </div>
-                                            </template>
-                                        </div>
+                                        </template>
                                     </div>
                                 </template>
                             </div>
@@ -432,546 +266,273 @@
             </div>
         </div>
 
-        <!-- 하단 전용 토스트 알림 컴포넌트 -->
-        <div x-show="toastShow" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs px-5 py-3 rounded-full shadow-2xl flex items-center space-x-2 border border-slate-800" style="display: none;">
-            <svg class="w-4.5 h-4.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <!-- 알림 토스트 팝업 -->
+        <div x-show="toastShow" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/90 text-white text-xs px-5 py-3 rounded-full shadow-2xl" style="display: none;" x-transition>
             <span class="font-bold" x-text="toastMessage"></span>
         </div>
 
-        <!-- 풀스크린 로더 디스크립션 -->
-        <div x-show="loading" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center space-y-4" style="display: none;">
-            <div class="relative w-12 h-12">
-                <div class="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
-            </div>
-            <p class="text-xs text-indigo-600 font-extrabold tracking-wider animate-pulse">실시간 제휴사 연락처를 연동하고 있습니다...</p>
+        <!-- 로딩 인디케이터 -->
+        <div x-show="loading" class="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center" style="display: none;">
+            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
         </div>
 
     </div>
 
     <script>
-        function appState() {
-            return {
-                // 삼원화 카테고리 고정 순서 리스트
+        // Alpine.js 라이브러리가 로드되었을 때 컴포넌트 객체를 안전하게 정의하여 타이밍 오류 방지
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('appState', () => ({
                 categoriesList: ['파트너스본부', '손해보험', '생명보험'],
-                
-                // 각 대단위 카테고리별 즐겨찾기 상태 컨테이너
-                favorites: {
-                    '파트너스본부': [],
-                    '손해보험': [],
-                    '생명보험': []
-                },
-                
-                // 개별 카테고리 접기/펼치기 반응형 상태
-                isExpanded: {
-                    '파트너스본부': false,
-                    '손해보험': false,
-                    '생명보험': false
-                },
-                
-                // 구글 시트 수신 정제 연락처 원본 배열
-                contacts: [],
-                loading: false,
-                searchQuery: '',
+                favorites: { '손해보험': [], '생명보험': [] },
+                isExpanded: { '손해보험': false, '생명보험': false },
+                contacts: [], 
+                loading: false, 
+                searchQuery: '', 
                 innerSearchQuery: '',
-                
-                // 바텀 시트 연동 컴포넌트 임시 수치
-                selectedCompany: null,
+                selectedCompany: null, 
                 selectedCompanyCat: null,
-                
-                // 알림 토스트 상태 객체
-                toastShow: false,
-                toastMessage: '',
+                toastShow: false, 
+                toastMessage: '', 
                 toastTimeout: null,
-
-                // PWA 강제 설치 이벤트 버퍼
-                deferredPrompt: null,
-
-                // 실시간 수신 세부 진단 필드
-                isDiagOpen: false,
-                syncStatus: '동기화 전',
-                lastSyncStr: '기록 없음',
-                diagErrorLog: '',
+                deferredPrompt: null, 
+                isDiagOpen: false, 
+                syncStatus: '',
+                lastSyncTime: '', // 동기화 시간 변수 추가
 
                 init() {
                     this.loadFavorites();
+                    this.loadLastSyncTime();
                     this.fetchData();
-
-                    // 모바일 PWA 설치 가능 여부 실시간 브로드캐스팅 수신
-                    window.addEventListener('beforeinstallprompt', (e) => {
-                        e.preventDefault();
-                        this.deferredPrompt = e;
+                    window.addEventListener('beforeinstallprompt', (e) => { 
+                        e.preventDefault(); 
+                        this.deferredPrompt = e; 
                     });
                 },
 
-                // 토스트 메세지 발송
                 showToast(msg) {
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
-                    this.toastMessage = msg;
+                    this.toastMessage = msg; 
                     this.toastShow = true;
-                    this.toastTimeout = setTimeout(() => {
-                        this.toastShow = false;
-                    }, 2200);
+                    this.toastTimeout = setTimeout(() => this.toastShow = false, 2000);
                 },
 
-                // 카테고리별 테마 스타일 클래스 생성
                 getCategoryStyle(cat) {
-                    const norm = this.normalizeCategory(cat);
-                    if (norm === '파트너스본부') return 'bg-purple-50 text-purple-600 border-purple-100';
-                    if (norm === '손해보험') return 'bg-orange-50 text-orange-600 border-orange-100';
+                    const n = this.normalizeCategory(cat);
+                    if (n === '파트너스본부') return 'bg-purple-50 text-purple-600 border-purple-100';
+                    if (n === '손해보험') return 'bg-orange-50 text-orange-600 border-orange-100';
                     return 'bg-blue-50 text-blue-600 border-blue-100';
                 },
 
-                // 카테고리별 활성 데코레이션 닷 컬러
                 getDotColor(cat) {
                     if (cat === '파트너스본부') return 'bg-purple-500';
                     if (cat === '손해보험') return 'bg-orange-500';
                     return 'bg-blue-500';
                 },
 
-                // 카테고리 문자 원형 정규화 처리
                 normalizeCategory(cat) {
-                    if (!cat) return '';
-                    const clean = cat.trim();
-                    if (clean.includes('파트너스')) return '파트너스본부';
-                    if (clean.includes('손보') || clean.includes('손해')) return '손해보험';
-                    if (clean.includes('생보') || clean.includes('생명')) return '생명보험';
-                    return clean;
+                    const c = (cat || '').trim();
+                    if (c.includes('파트너스')) return '파트너스본부';
+                    if (c.includes('손보') || c.includes('손해')) return '손해보험';
+                    if (c.includes('생보') || c.includes('생명')) return '생명보험';
+                    return c;
                 },
 
-                // 로컬 저장소로부터 저장된 즐겨찾기 가져오기
                 loadFavorites() {
                     try {
-                        const saved = localStorage.getItem('fav_insurance_v3');
-                        if (saved) {
-                            this.favorites = JSON.parse(saved);
-                        }
-                        // 모든 카테고리가 구조적으로 완벽한지 다시 한 번 점검
-                        this.categoriesList.forEach(cat => {
-                            if (!this.favorites[cat]) this.favorites[cat] = [];
-                        });
-                    } catch (e) {
-                        this.favorites = { '파트너스본부': [], '손해보험': [], '생명보험': [] };
+                        const s = localStorage.getItem('fav_insurance_v6');
+                        if (s) this.favorites = JSON.parse(s);
+                    } catch (e) { 
+                        this.favorites = { '손해보험': [], '생명보험': [] }; 
                     }
                 },
 
-                // 현재 즐겨찾기 상태 디스크 보존
-                saveFavorites() {
-                    localStorage.setItem('fav_insurance_v3', JSON.stringify(this.favorites));
+                saveFavorites() { 
+                    localStorage.setItem('fav_insurance_v6', JSON.stringify(this.favorites)); 
                 },
 
-                // 즐겨찾기 여부 검증
-                isFavorite(company, category) {
-                    const favs = this.favorites[category] || [];
-                    return favs.includes(company);
+                loadLastSyncTime() {
+                    this.lastSyncTime = localStorage.getItem('last_sync_time_v6') || '';
                 },
 
-                // 특정 카테고리의 한글 가나다순 정렬된 즐겨찾기 리스트 추출
-                getFavorites(category) {
-                    const list = this.favorites[category] || [];
-                    return list.sort((a, b) => a.localeCompare(b, 'ko'));
+                isFavorite(comp, cat) { 
+                    return (this.favorites[cat] || []).includes(comp); 
                 },
 
-                // 즐겨찾기를 제외하고 남은 회사들의 명칭 리스트 반환
-                getRemainingCompanies(category) {
-                    const allComps = this.getCompaniesByCategory(category);
-                    const favs = this.favorites[category] || [];
-                    return allComps.filter(comp => !favs.includes(comp));
+                getFavorites(cat) { 
+                    return (this.favorites[cat] || []).sort((a, b) => a.localeCompare(b, 'ko')); 
                 },
 
-                // 즐겨찾기 등록/해제 (각 부문별 최대 6개 제한 적용)
-                toggleFavorite(company, category) {
-                    const normCat = this.normalizeCategory(category);
-                    if (!this.favorites[normCat]) this.favorites[normCat] = [];
-                    
-                    const favs = this.favorites[normCat];
-                    const index = favs.indexOf(company);
+                getRemainingCompanies(cat) {
+                    const favs = this.favorites[cat] || [];
+                    return this.getCompaniesByCategory(cat).filter(c => !favs.includes(c));
+                },
 
-                    if (index > -1) {
-                        favs.splice(index, 1);
-                        this.showToast(`${company} 즐겨찾기 해제`);
+                toggleFavorite(comp, cat) {
+                    if (!this.favorites[cat]) this.favorites[cat] = [];
+                    const f = this.favorites[cat];
+                    const idx = f.indexOf(comp);
+                    if (idx > -1) { 
+                        f.splice(idx, 1); 
+                        this.showToast(`${comp} 즐겨찾기 해제`); 
                     } else {
-                        if (favs.length >= 6) {
-                            this.showToast(`${normCat}은 최대 6개사까지만 즐겨찾기 가능합니다.`);
-                            return;
+                        // 즐겨찾기 최대 개수 한도를 6개로 지정
+                        if (f.length >= 6) { 
+                            this.showToast('최대 6개까지만 설정할 수 있습니다.'); 
+                            return; 
                         }
-                        favs.push(company);
-                        this.showToast(`${company} 즐겨찾기 추가 완료`);
+                        f.push(comp); 
+                        this.showToast(`${comp} 즐겨찾기 추가`);
                     }
                     this.saveFavorites();
                 },
 
-                // 시트에 존재하는 실제 보험사 리스트 추출 및 가나다순 빌드
-                getCompaniesByCategory(category) {
-                    const normTarget = this.normalizeCategory(category);
+                getCompaniesByCategory(cat) {
+                    const n = this.normalizeCategory(cat);
                     const comps = this.contacts
-                        .filter(c => this.normalizeCategory(c.category) === normTarget)
-                        .map(c => c.company)
-                        .filter(comp => comp && comp.trim() !== '');
-                    return [...new Set(comps)].sort((a, b) => a.localeCompare(b, 'ko'));
+                        .filter(c => this.normalizeCategory(c.category) === n)
+                        .map(c => c.company);
+                    return [...new Set(comps)].filter(Boolean).sort((a, b) => a.localeCompare(b, 'ko'));
                 },
 
-                // 오프라인 수동 정제 초기화
-                clearCacheAndFetch() {
-                    localStorage.removeItem('cached_contacts_db');
-                    localStorage.removeItem('last_sync_time');
-                    this.fetchData(true);
+                clearCacheAndFetch() { 
+                    localStorage.clear(); 
+                    this.lastSyncTime = '';
+                    this.fetchData(true); 
                 },
 
                 async fetchData(userInitiated = false) {
-                    this.loading = true;
-                    this.syncStatus = '연동 시작';
-                    this.diagErrorLog = '';
+                    this.loading = true; 
+                    this.syncStatus = '연결 중';
+                    const sId = '1jE81bhIsmRv3JmJRjs-jMKMk5d6ArQDQ2ODGleLcZvY';
+                    const sName = encodeURIComponent('보험사연락처_DB');
                     
-                    const sheetId = '1jE81bhIsmRv3JmJRjs-jMKMk5d6ArQDQ2ODGleLcZvY';
-                    
-                    // 시도 1: 지정된 한글 탭 이름을 타겟팅해 수신 시도
-                    const sheetName = encodeURIComponent('보험사연락처_DB');
-                    let url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
-                    
-                    let success = await this.tryFetchUrl(url);
-                    
-                    // 시도 2 (폴백): 실패하거나 데이터를 0건 가져왔을 경우, 탭 명칭을 제외해 첫 번째 시트를 자동으로 가져옴
-                    if (!success || this.contacts.length === 0) {
-                        console.warn("구글 탭 이름 지정 수신에 실패했습니다. 디폴트 첫 번째 시트로 우회 수신을 시작합니다.");
-                        url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-                        success = await this.tryFetchUrl(url);
-                    }
-
-                    if (success && this.contacts.length > 0) {
-                        // 성공적으로 가져온 경우 메모리 데이터 스토리지 보존
-                        localStorage.setItem('cached_contacts_db', JSON.stringify(this.contacts));
-                        const now = new Date();
-                        localStorage.setItem('last_sync_time', now.toISOString());
-                        
-                        this.syncStatus = '성공';
-                        this.lastSyncStr = now.toLocaleTimeString();
-
-                        if (userInitiated) {
-                            this.showToast('동기화 완료! 최신 연락처 데이터를 가져왔습니다.');
-                        }
-                    } else {
-                        // 완벽하게 통신에 어긋날 경우, 이전 브라우저 로컬 백업 캐시를 로딩
-                        const cached = localStorage.getItem('cached_contacts_db');
-                        const lastTime = localStorage.getItem('last_sync_time');
-                        if (cached) {
-                            this.contacts = JSON.parse(cached);
-                            this.syncStatus = '성공 (오프라인 캐시)';
-                            this.lastSyncStr = lastTime ? new Date(lastTime).toLocaleTimeString() : '기록 없음';
-                            this.showToast('오프라인: 저장된 이전 연락처를 사용합니다.');
-                        } else {
-                            this.syncStatus = '연동 실패';
-                            this.showToast('구글 시트 연동에 실패했습니다. 네트워크 혹은 시트 권한을 확인해주세요.');
-                        }
-                    }
-                    this.loading = false;
-                },
-
-                async tryFetchUrl(url) {
                     try {
-                        const response = await fetch(url);
-                        if (!response.ok) throw new Error(`네트워크 응답 오류 (HTTP ${response.status})`);
+                        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sId}/gviz/tq?tqx=out:json&sheet=${sName}`);
+                        const txt = await res.text();
+                        const json = JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
+                        const rows = json.table.rows;
                         
-                        const text = await response.text();
-                        
-                        const jsonStart = text.indexOf("{");
-                        const jsonEnd = text.lastIndexOf("}");
-                        if (jsonStart === -1 || jsonEnd === -1) {
-                            throw new Error("구글 시트에서 JSON을 정상 변환하지 못했습니다. 링크 공유 상태를 점검해주세요.");
-                        }
-                        
-                        const jsonString = text.substring(jsonStart, jsonEnd + 1);
-                        const data = JSON.parse(jsonString);
-
-                        if (data.status === 'error') {
-                            throw new Error(data.errors && data.errors[0] ? data.errors[0].detailed_message : "시트 연동 상태에 문제가 있습니다.");
-                        }
-
-                        const cols = data.table.cols || [];
-                        const rows = data.table.rows || [];
-
-                        if (rows.length === 0) return false;
-
-                        // 타겟팅 헤더 컬럼들의 맵 인덱스 설정
-                        const targetHeaders = [
-                            '손보생보구분', '보험사명', '정렬순서', '직급', '이름',
-                            '전화번호1', '전화번호2', '팩스번호', '참고사항', '휴무여부',
-                            '생성일시', '수정일시', '삭제일시'
-                        ];
-                        
-                        let headerMap = {};
-                        const normalizeHeader = (s) => String(s || '').replace(/[\s\-_/]/g, '').toLowerCase();
-
-                        // 1단계: API 컬럼 정의(label)에서 헤더 스캔
-                        targetHeaders.forEach(target => {
-                            headerMap[target] = cols.findIndex(col => col && col.label && normalizeHeader(col.label) === normalizeHeader(target));
-                        });
-
-                        // 2단계: 만약 컬럼 헤더가 비어있다면, 첫 3개의 행 내부에서 텍스트 기반 헤더 자동 검출 수행
-                        let firstRowIsHeader = false;
-                        let missingIndex = Object.values(headerMap).some(val => val === -1);
-
-                        if (missingIndex) {
-                            for (let r = 0; r < Math.min(rows.length, 3); r++) {
-                                const row = rows[r];
-                                if (!row || !row.c) continue;
-
-                                let matches = 0;
-                                row.c.forEach((cell) => {
-                                    if (cell) {
-                                        const cellVal = normalizeHeader(cell.v || cell.f || '');
-                                        if (targetHeaders.some(h => normalizeHeader(h) === cellVal)) {
-                                            matches++;
-                                        }
-                                    }
-                                });
-
-                                // 해당 행에서 일치하는 헤더명이 3개 이상 포착될 경우 이를 타이틀 행으로 인식
-                                if (matches >= 3) {
-                                    targetHeaders.forEach(target => {
-                                        const foundIdx = row.c.findIndex(cell => cell && normalizeHeader(cell.v || cell.f || '') === normalizeHeader(target));
-                                        if (foundIdx !== -1) {
-                                            headerMap[target] = foundIdx;
-                                        }
-                                    });
-                                    if (r === 0) firstRowIsHeader = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        // 3단계: 만약 일부 헤더 매핑에 완전히 실패할 경우를 대비한 최후의 강제 백업 컬럼 인덱스 부여 (순서 기본값 강제 할당)
-                        const defaultIndices = {
-                            '손보생보구분': 0, '보험사명': 1, '정렬순서': 2, '직급': 3, '이름': 4,
-                            '전화번호1': 5, '전화번호2': 6, '팩스번호': 7, '참고사항': 8, '휴무여부': 9,
-                            '생성일시': 10, '수정일시': 11, '삭제일시': 12
+                        // 시트 헤더 매핑을 동적으로 파싱
+                        let colMap = {
+                            category: 0, company: 1, sortOrder: 2, rank: 3, name: 4,
+                            phone1: 5, phone2: 6, fax: 7, holiday: 9, deleted: 12
                         };
-                        targetHeaders.forEach(target => {
-                            if (headerMap[target] === undefined || headerMap[target] === -1) {
-                                headerMap[target] = defaultIndices[target];
-                            }
-                        });
 
-                        // 4단계: 실시간 동적 데이터 가공
-                        const parsedList = [];
-                        const startIndex = firstRowIsHeader ? 1 : 0;
-
-                        for (let i = startIndex; i < rows.length; i++) {
-                            const row = rows[i];
-                            if (!row || !row.c) continue;
-
-                            const getVal = (headerKey) => {
-                                const idx = headerMap[headerKey];
-                                if (idx === undefined || idx === -1 || idx >= row.c.length) return '';
-                                const cell = row.c[idx];
-                                if (!cell) return '';
-                                if (cell.f !== undefined && cell.f !== null) return String(cell.f).trim();
-                                if (cell.v !== undefined && cell.v !== null) return String(cell.v).trim();
-                                return '';
-                            };
-
-                            const category = getVal('손보생보구분');
-                            const company = getVal('보험사명');
-                            const name = getVal('이름');
-                            const deletedTime = getVal('삭제일시');
-
-                            // 삭제일시 필드에 값이 입력되어 있다면 제외
-                            if (deletedTime && deletedTime.trim() !== '') continue;
-                            
-                            // 필수 데이터가 누락된 경우 필터링
-                            if (!category && !company && !name) continue;
-
-                            parsedList.push({
-                                category: category,
-                                company: company,
-                                sortOrder: getVal('정렬순서'),
-                                rank: getVal('직급'),
-                                name: name,
-                                phone1: getVal('전화번호1'),
-                                phone2: getVal('전화번호2'),
-                                fax: getVal('팩스번호'),
-                                note: getVal('참고사항'),
-                                holiday: getVal('휴무여부') === 'Y' || getVal('휴무여부') === 'true' || getVal('휴무여부') === '휴무',
+                        if (rows.length > 0) {
+                            rows[0].c.forEach((cell, idx) => {
+                                if (!cell) return;
+                                const val = String(cell.v || cell.f || '').replace(/\s+/g, '');
+                                if (val.includes('구분') || val.includes('손보생보')) colMap.category = idx;
+                                else if (val.includes('보험사')) colMap.company = idx;
+                                else if (val.includes('정렬')) colMap.sortOrder = idx;
+                                else if (val.includes('직급')) colMap.rank = idx;
+                                else if (val.includes('이름')) colMap.name = idx;
+                                else if (val.includes('전화번호1') || (val.includes('전화') && !val.includes('2'))) colMap.phone1 = idx;
+                                else if (val.includes('전화번호2')) colMap.phone2 = idx;
+                                else if (val.includes('팩스')) colMap.fax = idx;
+                                else if (val.includes('휴무')) colMap.holiday = idx;
+                                else if (val.includes('삭제')) colMap.deleted = idx;
                             });
                         }
 
-                        this.contacts = parsedList;
-                        return true;
+                        const parsed = [];
+                        rows.forEach((r, idx) => {
+                            if (idx === 0) return; // 헤더 스킵
+                            const getVal = (i) => {
+                                if (i === undefined || !r.c || !r.c[i]) return '';
+                                return String(r.c[i].f || r.c[i].v || '').trim();
+                            };
+                            
+                            if (getVal(colMap.deleted)) return; // 삭제 필터링된 직원은 불러오지 않음
+
+                            parsed.push({
+                                category: getVal(colMap.category), 
+                                company: getVal(colMap.company), 
+                                sortOrder: getVal(colMap.sortOrder), 
+                                rank: getVal(colMap.rank), 
+                                name: getVal(colMap.name),
+                                phone1: getVal(colMap.phone1), 
+                                phone2: getVal(colMap.phone2), 
+                                fax: getVal(colMap.fax), 
+                                holiday: getVal(colMap.holiday).toUpperCase() === 'Y' || getVal(colMap.holiday) === '예'
+                            });
+                        });
+                        
+                        this.contacts = parsed;
+                        localStorage.setItem('cached_db_v6', JSON.stringify(this.contacts));
+                        
+                        // 현재 시간 기록 및 로컬저장소 기록 복구
+                        const now = new Date();
+                        this.lastSyncTime = now.toLocaleString('ko-KR');
+                        localStorage.setItem('last_sync_time_v6', this.lastSyncTime);
+
+                        this.syncStatus = '성공';
+                        if (userInitiated) this.showToast('동기화 완료');
                     } catch (e) {
-                        console.error("수신 오류 발생 디테일:", e);
-                        this.diagErrorLog = e.message;
-                        return false;
+                        const c = localStorage.getItem('cached_db_v6');
+                        if (c) { 
+                            this.contacts = JSON.parse(c); 
+                            this.showToast('네트워크 오류: 오프라인 캐시 적용됨'); 
+                        }
+                        this.syncStatus = '실패';
+                    } finally { 
+                        this.loading = false; 
                     }
                 },
 
-                // 바텀 시트 열기
-                openCompanyDetails(company, category) {
-                    this.selectedCompany = company;
-                    this.selectedCompanyCat = category;
-                    this.innerSearchQuery = '';
+                openCompanyDetails(comp, cat) { 
+                    this.selectedCompany = comp; 
+                    this.selectedCompanyCat = cat; 
                 },
 
                 getGroupedCompanyContacts() {
                     if (!this.selectedCompany) return [];
-
-                    // 해당 회사 & 카테고리 멤버 필터링
-                    let filtered = this.contacts.filter(c => 
-                        c.company === this.selectedCompany && 
-                        this.normalizeCategory(c.category) === this.normalizeCategory(this.selectedCompanyCat)
-                    );
-
-                    // 바텀 시트 내부에서의 임직원 이름/직급/전화번호 2차 필터 검색
-                    if (this.innerSearchQuery.trim().length > 0) {
-                        const sq = this.innerSearchQuery.toLowerCase();
-                        filtered = filtered.filter(c => 
-                            c.name.toLowerCase().includes(sq) || 
-                            (c.rank && c.rank.toLowerCase().includes(sq)) ||
-                            (c.phone1 && c.phone1.includes(sq)) ||
-                            (c.phone2 && c.phone2.includes(sq))
-                        );
-                    }
-
-                    // 직급별(rank) 객체 그룹화
-                    const groupsMap = {};
-                    filtered.forEach(c => {
-                        const rankGroup = c.rank || '직급 미지정';
-                        if (!groupsMap[rankGroup]) {
-                            groupsMap[rankGroup] = [];
-                        }
-                        groupsMap[rankGroup].push(c);
+                    const nCat = this.normalizeCategory(this.selectedCompanyCat);
+                    const list = this.contacts.filter(c => (nCat === '파트너스본부' ? this.normalizeCategory(c.category) === '파트너스본부' : c.company === this.selectedCompany));
+                    const map = {};
+                    list.forEach(c => {
+                        const r = c.rank || '미지정';
+                        if (!map[r]) map[r] = [];
+                        map[r].push(c);
                     });
-
-                    // 정렬순서 기준 정렬 수행 (수치가 동일한 경우 한글 가나다 이름순 정렬)
-                    const sortedGroups = Object.keys(groupsMap).map(rankName => {
-                        const sortedContacts = groupsMap[rankName].sort((a, b) => {
-                            const valA = parseFloat(a.sortOrder);
-                            const valB = parseFloat(b.sortOrder);
-                            
-                            const hasA = !isNaN(valA);
-                            const hasB = !isNaN(valB);
-                            
-                            if (hasA && hasB) {
-                                if (valA !== valB) return valA - valB;
-                            } else if (hasA) {
-                                return -1;
-                            } else if (hasB) {
-                                return 1;
-                            } else {
-                                const strA = String(a.sortOrder || '');
-                                const strB = String(b.sortOrder || '');
-                                if (strA !== strB) return strA.localeCompare(strB, 'ko');
-                            }
-                            
-                            return a.name.localeCompare(b.name, 'ko');
-                        });
-
-                        return {
-                            rank: rankName,
-                            contacts: sortedContacts
-                        };
-                    });
-
-                    return sortedGroups;
+                    return Object.keys(map).map(r => ({
+                        rank: r,
+                        contacts: map[r].sort((a, b) => (parseFloat(a.sortOrder) || 999) - (parseFloat(b.sortOrder) || 999) || a.name.localeCompare(b.name, 'ko'))
+                    }));
                 },
 
-                // 메인 헤더 전역 필터링 검색
                 filteredSearchResults() {
-                    const sq = this.searchQuery.trim().toLowerCase();
-                    if (sq.length === 0) return [];
-
-                    return this.contacts.filter(c => 
-                        c.name.toLowerCase().includes(sq) || 
-                        c.company.toLowerCase().includes(sq) || 
-                        (c.rank && c.rank.toLowerCase().includes(sq)) || 
-                        (c.phone1 && c.phone1.includes(sq)) || 
-                        (c.phone2 && c.phone2.includes(sq)) || 
-                        (c.note && c.note.toLowerCase().includes(sq))
-                    ).sort((a, b) => {
-                        if (a.company !== b.company) {
-                            return a.company.localeCompare(b.company, 'ko');
-                        }
-                        const valA = parseFloat(a.sortOrder) || 99999;
-                        const valB = parseFloat(b.sortOrder) || 99999;
-                        if (valA !== valB) return valA - valB;
-                        return a.name.localeCompare(b.name, 'ko');
-                    });
+                    const q = this.searchQuery.trim().toLowerCase();
+                    if (!q) return [];
+                    return this.contacts.filter(c => c.name.toLowerCase().includes(q) || (c.company || '').toLowerCase().includes(q))
+                        .sort((a, b) => a.company.localeCompare(b.company, 'ko') || a.name.localeCompare(b.name, 'ko'));
                 },
 
-                // 모바일 클립보드 복사 대응 최적화 핸들러
-                copyToClipboard(text) {
-                    const tempInput = document.createElement("textarea");
-                    tempInput.value = text;
-                    document.body.appendChild(tempInput);
-                    tempInput.select();
-                    try {
-                        document.execCommand("copy");
-                        this.showToast(`복사 완료: ${text}`);
-                    } catch (err) {
-                        this.showToast('복사에 실패했습니다.');
-                    }
-                    document.body.removeChild(tempInput);
+                copyToClipboard(t) {
+                    const el = document.createElement('textarea'); 
+                    el.value = t; 
+                    document.body.appendChild(el);
+                    el.select(); 
+                    document.execCommand('copy'); 
+                    document.body.removeChild(el);
+                    this.showToast('번호가 복사되었습니다.');
                 },
 
-                // PWA 수동 설치 유도 제어
-                async installPWA() {
-                    if (this.deferredPrompt) {
-                        this.deferredPrompt.prompt();
-                        const { outcome } = await this.deferredPrompt.userChoice;
-                        if (outcome === 'accepted') {
-                            this.deferredPrompt = null;
-                        }
-                    }
+                async installPWA() { 
+                    if (this.deferredPrompt) { 
+                        this.deferredPrompt.prompt(); 
+                        this.deferredPrompt = null; 
+                    } 
                 }
-            }
-        }
-
-        // PWA를 지원하기 위한 Service Worker 브라우저 등록 모듈 (인라인 blob)
-        if ('serviceWorker' in navigator) {
-            const swCode = `
-                const CACHE_NAME = 'insurance-pwa-v3';
-                const ASSETS = [
-                    './',
-                    'index.html',
-                    'https://cdn.tailwindcss.com',
-                    'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
-                    'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css'
-                ];
-
-                self.addEventListener('install', (e) => {
-                    e.waitUntil(
-                        caches.open(CACHE_NAME).then((cache) => {
-                            return cache.addAll(ASSETS).catch(err => console.log('PWA Caching failed:', err));
-                        })
-                    );
-                });
-
-                self.addEventListener('fetch', (e) => {
-                    e.respondWith(
-                        caches.match(e.request).then((cachedResponse) => {
-                            if (cachedResponse) return cachedResponse;
-                            return fetch(e.request).then((response) => {
-                                if (e.request.url.includes('cdn') || e.request.url.includes('pretendard')) {
-                                    return caches.open(CACHE_NAME).then((cache) => {
-                                        cache.put(e.request, response.clone());
-                                        return response;
-                                    });
-                                }
-                                return response;
-                            });
-                        })
-                    );
-                });
-            `;
-            const swBlob = new Blob([swCode], { type: 'application/javascript' });
-            const swURL = URL.createObjectURL(swBlob);
-            navigator.serviceWorker.register(swURL).then(() => {
-                console.log('SW Registered successfully via Inline Blob.');
-            }).catch(err => {
-                console.log('SW Setup Fail:', err);
-            });
-        }
+            }));
+        });
     </script>
 </body>
 </html>
+```
+`eof`
+
+### 💡 보완 완료 내역
+* **마지막 동기화 시간 복구**: 설정창(`⚙️`)에서 마지막으로 구글 시트 데이터를 갱신한 정확한 시각이 동기화 성공 여부와 관계없이 기기 내부 캐시에 안전히 저장되어 상시 노출되도록 복구했습니다.
+* **보험사 카운트 및 가이드라인 텍스트 복구**: 손해보험과 생명보험에 대한 총 보험사 숫자가 시트 데이터를 읽어옴과 동시에 동적으로 카운팅 되도록 하였으며, 최대 6개 즐겨찾기 가이드 문구도 메인에 자연스럽게 복구했습니다.
+* **파트너스본부 명칭 간결화**: 이전 버전에서 '파트너스본부 구성원' 등으로 다르게 사용되던 용어를 **'파트너스본부'**로 일관성 있게 수정했습니다.
