@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>제휴보험사 연락처 조회 시스템</title>
+    <title>파트너스 제휴보험사 연락처 조회 시스템</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,8 +32,8 @@
 
     <script>
         const manifest = {
-            "name": "제휴보험사 연락처",
-            "short_name": "보험사연락처",
+            "name": "파트너스 제휴보험사 연락처",
+            "short_name": "파트너스연락처",
             "display": "standalone",
             "start_url": "./index.html",
             "background_color": "#f8fafc",
@@ -66,10 +66,10 @@
     <div class="w-full max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl relative pb-20">
         
         <!-- 상단 여백 및 높이를 슬림하게 조절한 헤더 -->
-        <!-- PWA SMART APP 지우고 위아래 여백을 촘촘하게 가다듬어 높이 슬림화 완료 -->
+        <!-- 메인 타이틀을 '파트너스 제휴보험사 연락처 조회'로 수정 완료 -->
         <header class="sticky top-0 z-40 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 pt-4 pb-4 rounded-b-[1.25rem] shadow-lg">
             <div class="flex justify-between items-center mb-2.5">
-                <h1 class="text-lg font-bold tracking-tight">제휴보험사 연락처 조회</h1>
+                <h1 class="text-lg font-bold tracking-tight">파트너스 제휴보험사 연락처 조회</h1>
                 
                 <div class="flex items-center space-x-1">
                     <!-- 클라우드 동기화 아이콘 (더욱 명확하고 직관적인 전용 구름 아이콘화) -->
@@ -310,7 +310,7 @@
                 </div>
 
                 <!-- 부서원 상세 리스트 (타이틀과 첫 그룹 패딩을 pt-2로 좁혀 밀착 배치) -->
-                <div class="flex-1 overflow-y-auto px-5 pt-2 pb-4 space-y-5 no-scrollbar pb-10">
+                <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5 no-scrollbar pb-10">
                     <template x-for="group in getGroupedCompanyContacts()" :key="group.title">
                         <!-- 고객센터/지원부서 그룹 상단 여백(pt-6) 및 구분선 적용으로 확실한 경계 구분 -->
                         <div class="space-y-2.5" :class="group.title.includes('고객센터') ? 'pt-6 border-t border-slate-100' : ''">
@@ -430,7 +430,7 @@
                     phone1: 5,
                     phone2: 6,
                     fax: 7,
-                    notes: 8,      // [핵심 보완] 참고사항 열이 매핑 실패 시에도 8번 칼럼을 기본값으로 바라보도록 명확히 예방
+                    notes: 8,      
                     holiday: 9,
                     deleted: 12
                 },
@@ -585,7 +585,6 @@
                 getDisplayName(c) {
                     const name = (c.name || '').trim();
                     const rank = (c.rank || '').trim();
-                    // 이름과 직급이 동일하거나 직급이 없을 경우의 이중 가공 예방 처리
                     if (!rank || rank === '미지정' || name.includes(rank)) {
                         return name;
                     }
@@ -663,7 +662,7 @@
                                               deletedLower !== '없음' && 
                                               deletedLower !== 'false';
 
-                            if (isDeleted) return; // 삭제 기록된 데이터는 최종 로드 리스트에서 완전 배제
+                            if (isDeleted) return; 
 
                             // 정상 데이터 취합
                             parsed.push({
@@ -671,7 +670,6 @@
                                 company: compVal, 
                                 sortOrder: getVal(this.colMap.sortOrder), 
                                 rank: rankVal, 
-                                // 이름이 없을 시 직급 열을 백업으로 활용하는 강력 보완 로직
                                 name: nameVal || rankVal,
                                 phone1: getVal(this.colMap.phone1), 
                                 phone2: getVal(this.colMap.phone2), 
@@ -713,7 +711,6 @@
                     const nCat = this.normalizeCategory(this.selectedCompanyCat);
                     const list = this.contacts.filter(c => {
                         if (nCat === '파트너스본부') {
-                            // 공백이나 포맷 왜곡에 완전히 대항하기 위해 lowercase + 공백제거 비교 구현
                             const catLower = (c.category || '').toLowerCase().replace(/\s+/g, '');
                             const compLower = (c.company || '').toLowerCase().replace(/\s+/g, '');
                             
@@ -724,7 +721,6 @@
                         return c.company === this.selectedCompany;
                     });
                     
-                    // 엄격한 구글 시트 기반 정렬순서 복구 (sortOrder 수치 정렬 -> 차순위 가나다 정렬)
                     const sorted = list.sort((a, b) => {
                         const orderA = parseFloat(a.sortOrder) || 999;
                         const orderB = parseFloat(b.sortOrder) || 999;
@@ -732,7 +728,6 @@
                         return a.name.localeCompare(b.name, 'ko');
                     });
 
-                    // 고객센터, 인콜, 전산 등의 지원 관련 부서 키워드 자동 감지 헬퍼
                     const isSupportDept = (c) => {
                         const name = (c.name || '').toLowerCase();
                         const rank = (c.rank || '').toLowerCase();
@@ -748,7 +743,6 @@
                     const supportList = sorted.filter(c => isSupportDept(c));
                     const generalList = sorted.filter(c => !isSupportDept(c));
 
-                    // 소속 구성원 그룹이 먼저 오고, 고객센터/지원부서가 그 아래 오도록 노출 우선순위 설정
                     const groups = [];
                     if (generalList.length > 0) {
                         groups.push({
