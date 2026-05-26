@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>파트너스 제휴보험사 연락처 조회 시스템</title>
+    <title>파트너스 제휴보험사 연락처</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,8 +32,8 @@
 
     <script>
         const manifest = {
-            "name": "파트너스 제휴보험사 연락처",
-            "short_name": "파트너스연락처",
+            "name": "제휴보험사 연락처",
+            "short_name": "보험사 연락처",
             "display": "standalone",
             "start_url": "./index.html",
             "background_color": "#f8fafc",
@@ -66,13 +66,13 @@
     <div class="w-full max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl relative pb-20">
         
         <!-- 상단 여백 및 높이를 슬림하게 조절한 헤더 -->
-        <!-- 메인 타이틀을 '파트너스 제휴보험사 연락처 조회'로 수정 완료 -->
+        <!-- 메인 타이틀을 요청하신 사양대로 '파트너스 제휴보험사 연락처'로 수정 완료 -->
         <header class="sticky top-0 z-40 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 pt-4 pb-4 rounded-b-[1.25rem] shadow-lg">
             <div class="flex justify-between items-center mb-2.5">
-                <h1 class="text-lg font-bold tracking-tight">파트너스 제휴보험사 연락처 조회</h1>
+                <h1 class="text-lg font-bold tracking-tight">파트너스 제휴보험사 연락처</h1>
                 
                 <div class="flex items-center space-x-1">
-                    <!-- 클라우드 동기화 아이콘 (더욱 명확하고 직관적인 전용 구름 아이콘화) -->
+                    <!-- 클라우드 동기화 아이콘 -->
                     <button @click="fetchData(true)" class="p-2 bg-white/10 hover:bg-white/20 active:scale-90 transition-all rounded-full" title="데이터 동기화">
                         <svg class="w-5 h-5 text-white" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
@@ -103,7 +103,7 @@
         <!-- py-5에서 pt-2.5로 상단 마진을 조절하여 헤더와의 긴밀한 배치 구축 -->
         <main class="flex-1 px-4 pt-2.5 pb-5 space-y-4 overflow-y-auto no-scrollbar">
 
-            <!-- PWA 스마트폰 홈 화면 추가 안내 메시지 카드 (요청 문구 및 아이콘 가이드 완벽 수정) -->
+            <!-- PWA 스마트폰 홈 화면 추가 안내 메시지 카드 -->
             <div x-show="showPwaGuide && !isPwaActive()" class="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-4 rounded-2xl relative shadow-sm" x-transition style="display: none;">
                 <button @click="showPwaGuide = false" class="absolute top-3.5 right-3.5 text-amber-500 hover:text-amber-700" title="가이드 닫기">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -133,7 +133,7 @@
                 <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 text-white rounded-lg font-bold mt-2">캐시 초기화 및 재동기화</button>
             </div>
             
-            <!-- 통합 검색 활성화 시 결과 노출 영역 (다중 연락처 구조 전면 반영) -->
+            <!-- 통합 검색 결과 영역 -->
             <template x-if="searchQuery.trim().length > 0">
                 <div class="space-y-3">
                     <h2 class="text-xs font-bold text-indigo-600 px-1">검색 결과 (<span x-text="filteredSearchResults().length"></span>건)</h2>
@@ -147,7 +147,6 @@
                                             <span class="text-xs text-indigo-600 font-bold" x-text="contact.company"></span>
                                         </div>
                                         <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
-                                            <!-- 이름 + 직급 통합 표기 적용 -->
                                             <span x-text="getDisplayName(contact)"></span>
                                         </h3>
                                     </div>
@@ -157,7 +156,6 @@
                                         </button>
                                     </template>
                                 </div>
-                                <!-- 다중 연락처 및 메모 통합 구조 -->
                                 <div class="space-y-2 text-xs border-t border-slate-50 pt-2.5">
                                     <template x-if="contact.phone1">
                                         <div class="flex justify-between items-center py-1">
@@ -209,14 +207,13 @@
             <template x-if="searchQuery.trim().length === 0">
                 <div class="space-y-4">
                     
-                    <!-- 파트너스본부: 카드 내부 선 및 불필요 여백 제거 및 위치 상향 고정 -->
+                    <!-- 파트너스본부: 카드 구성 -->
                     <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center space-x-2">
                                 <div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div>
                                 <h2 class="text-base font-extrabold text-slate-800">파트너스본부</h2>
                             </div>
-                            <!-- '연락처 보기' 버튼 클릭 시 바텀 시트 연동 -->
                             <button @click="openCompanyDetails('파트너스본부', '파트너스본부')" 
                                     class="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 font-extrabold text-[11px] rounded-xl transition-all active:scale-95">
                                 연락처 보기
@@ -231,7 +228,6 @@
                                 <div class="flex justify-between items-center border-b border-slate-50 pb-2">
                                     <div class="flex items-center space-x-2">
                                         <div class="w-2.5 h-2.5 rounded-full" :class="getDotColor(cat)"></div>
-                                        <!-- 카테고리 명칭 및 총 보험사 수 수록 -->
                                         <h2 class="text-base font-extrabold text-slate-800">
                                             <span x-text="cat"></span>
                                             <span class="text-xs font-normal text-slate-400 ml-1" x-text="'(총 ' + getCompaniesByCategory(cat).length + '개)'"></span>
@@ -239,7 +235,6 @@
                                     </div>
                                 </div>
                                 
-                                <!-- 즐겨찾기가 하나라도 등록되어 있으면 가이드라인 설명 문구 자동 숨김 처리 -->
                                 <p x-show="getFavorites(cat).length === 0" class="text-[11px] text-slate-400 mt-1 leading-relaxed" x-transition>
                                     자주 찾는 보험사를 별표(★)를 눌러 최대 6개까지 홈 화면에 등록해 보세요.
                                 </p>
@@ -280,7 +275,7 @@
             </template>
         </main>
 
-        <!-- 높이 85vh로 조절 (주소창 차단 방지) / 스와이프 및 상단 원터치 닫기 지원 -->
+        <!-- 바텀 시트 팝업창 -->
         <div x-show="selectedCompany" class="fixed inset-0 z-50 overflow-hidden" style="display: none;">
             <!-- 모달 오버레이 배경 -->
             <div @click="selectedCompany = null" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"></div>
@@ -295,32 +290,27 @@
                 
                 <!-- 시트 상단 헤더 영역 클릭/터치 시 닫기 최적화 -->
                 <div @click="selectedCompany = null" class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50 sticky top-0 z-10 cursor-pointer active:bg-slate-100/50 transition-colors" title="터치하거나 아래로 밀어내리면 창이 닫힙니다.">
-                    <!-- 중앙 정렬된 슬라이드 핸들 바 -->
                     <div class="w-10 h-1 bg-slate-300 rounded-full mb-4"></div>
                     <div class="w-full flex items-center justify-between" @click.stop>
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] font-extrabold px-2 py-0.5 rounded border" :class="getCategoryStyle(selectedCompanyCat)" x-text="selectedCompanyCat"></span>
                             <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany"></h2>
                         </div>
-                        <!-- '닫기' 텍스트 기반 고시인성 프리미엄 버튼으로 전면 리뉴얼 -->
                         <button @click="selectedCompany = null" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-extrabold text-xs rounded-xl transition-all">
                             닫기
                         </button>
                     </div>
                 </div>
 
-                <!-- 부서원 상세 리스트 (타이틀과 첫 그룹 패딩을 pt-2로 좁혀 밀착 배치) -->
+                <!-- 부서원 상세 리스트 -->
                 <div class="flex-1 overflow-y-auto px-5 py-4 space-y-5 no-scrollbar pb-10">
                     <template x-for="group in getGroupedCompanyContacts()" :key="group.title">
-                        <!-- 고객센터/지원부서 그룹 상단 여백(pt-6) 및 구분선 적용으로 확실한 경계 구분 -->
                         <div class="space-y-2.5" :class="group.title.includes('고객센터') ? 'pt-6 border-t border-slate-100' : ''">
                             <h3 class="text-xs font-black text-indigo-600 tracking-wide border-l-2 border-indigo-500 pl-2" x-text="group.title"></h3>
                             <div class="grid gap-2">
-                                <!-- 인덱스를 결합한 고유 키 지정으로 Alpine DOM 충돌 누락 버그 완벽 방어 -->
                                 <template x-for="(contact, index) in group.contacts" :key="contact.phone1 + contact.name + index">
                                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-100" :class="contact.holiday ? 'opacity-50' : ''">
                                         
-                                        <!-- 이름 폰트 크기 한 단계 키움 (text-base) 및 휴무 배지를 이름(직급) 바로 오른쪽에 정교하게 정렬 -->
                                         <div class="flex items-center space-x-2 mb-1.5">
                                             <span class="font-extrabold text-slate-800 text-base" x-text="getDisplayName(contact)"></span>
                                             <template x-if="contact.holiday">
@@ -328,7 +318,6 @@
                                             </template>
                                         </div>
                                         
-                                        <!-- 이름과 바로 붙도록 간격을 좁힌 다중 연락처 및 참고 메모 렌더링 -->
                                         <div class="space-y-1.5 text-xs">
                                             <template x-if="contact.phone1">
                                                 <div class="flex justify-between items-center py-0.5">
@@ -415,12 +404,10 @@
                 lastSyncTime: '',
                 showPwaGuide: true, 
 
-                // 제스처 스와이프를 지원하는 터치 위치 추적 변수 및 뒤로가기 제어 시점 보존 변수
                 touchStartY: 0,
                 touchEndY: 0,
                 lastBackPress: 0,
 
-                // 구글 시트 칼럼 인덱스 매퍼 (기본 세팅 및 실시간 자동 보완 로직 연동)
                 colMap: {
                     category: 0,
                     company: 1,
@@ -444,10 +431,8 @@
                         this.deferredPrompt = e; 
                     });
 
-                    // 스마트폰 하드웨어/제스처 뒤로가기 감지 및 더블 클릭 앱 종료 시퀀스 설계
                     window.history.pushState({ page: 'home' }, '');
                     window.addEventListener('popstate', (e) => {
-                        // 만약 상세 바텀시트가 열려 있으면 뒤로가기 시 팝업만 부드럽게 닫아줌
                         if (this.selectedCompany) {
                             this.selectedCompany = null;
                             window.history.pushState({ page: 'home' }, '');
@@ -455,22 +440,20 @@
                         }
 
                         const now = Date.now();
-                        // 2초(2000ms) 이내에 연속 뒤로가기를 실행했을 경우 안전하게 앱 종료 우회 처리
                         if (now - this.lastBackPress < 2000) {
                             this.showToast('앱을 종료합니다.');
                             setTimeout(() => {
                                 window.close();
-                                window.location.href = 'about:blank'; // 세션 무력화 처리 폴백
+                                window.location.href = 'about:blank'; 
                             }, 350);
                         } else {
                             this.lastBackPress = now;
                             this.showToast('앱을 종료하려면 뒤로가기를 한 번 더 누르세요.');
-                            window.history.pushState({ page: 'home' }, ''); // 감지 히스토리 스택 강제 재배치
+                            window.history.pushState({ page: 'home' }, ''); 
                         }
                     });
                 },
 
-                // 스와이프 제스처 핸들러 구현 (아래로 밀어 팝업 닫기)
                 touchStart(e) {
                     this.touchStartY = e.touches[0].clientY;
                     this.touchEndY = e.touches[0].clientY;
@@ -581,7 +564,6 @@
                     this.fetchData(true); 
                 },
 
-                // 이름 + 직급 통합 표기 유틸리티 가공
                 getDisplayName(c) {
                     const name = (c.name || '').trim();
                     const rank = (c.rank || '').trim();
@@ -603,7 +585,6 @@
                         const json = JSON.parse(txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1));
                         const rows = json.table.rows;
                         
-                        // 헤더 매핑 헬퍼 함수 정의
                         const mapHeader = (val, idx) => {
                             if (val.includes('구분') || val.includes('손보생보')) this.colMap.category = idx;
                             else if (val.includes('보험사')) this.colMap.company = idx;
@@ -618,7 +599,6 @@
                             else if (val.includes('삭제')) this.colMap.deleted = idx;
                         };
 
-                        // [Case A] 구글 시트 API의 기본 cols 매핑 스캔
                         if (json.table.cols && json.table.cols.length > 0) {
                             json.table.cols.forEach((col, idx) => {
                                 if (!col || !col.label) return;
@@ -627,7 +607,6 @@
                             });
                         }
 
-                        // [Case B] 데이터 내 첫 번째 행(rows[0])을 통한 헤더 매핑 교차 검증
                         if (rows.length > 0) {
                             rows[0].c.forEach((cell, idx) => {
                                 if (!cell) return;
@@ -650,10 +629,8 @@
                             const rankVal = getVal(this.colMap.rank);
                             const deletedVal = getVal(this.colMap.deleted);
 
-                            // 첫 번째 행이 헤더 텍스트인 경우 파싱 스킵
                             if (idx === 0 && (catVal.includes('구분') || catVal.includes('손보생보'))) return;
 
-                            // '삭제일시' 검증 (진짜 날짜/일시 형태일 때만 무력화 삭제 처리)
                             const deletedLower = deletedVal.toLowerCase();
                             const isDeleted = deletedLower && 
                                               deletedLower !== '-' && 
@@ -664,7 +641,6 @@
 
                             if (isDeleted) return; 
 
-                            // 정상 데이터 취합
                             parsed.push({
                                 category: catVal, 
                                 company: compVal, 
