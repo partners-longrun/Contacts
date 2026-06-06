@@ -496,7 +496,7 @@
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
                     this.toastMessage = msg; 
                     this.toastShow = true;
-                    this.toastTimeout = setTimeout(() => this.toastShow = false, 2000);
+                    this.toastTimeout = setTimeout(() => this.toastShow = false, 2500); // 가이드 숙지를 위해 노출 시간 미세 조정
                 },
 
                 getCategoryStyle(cat) {
@@ -591,24 +591,27 @@
                     return `${name} ${rank}`;
                 },
 
-                // 휴대폰 번호(010으로 시작하는지) 판별 함수 추가
+                // 휴대폰 번호(010으로 시작하는지) 판별 함수
                 isMobileNumber(phone) {
                     if (!phone) return false;
                     const clean = phone.replace(/[^0-9]/g, '');
                     return clean.startsWith('010');
                 },
 
-                // 카카오톡 친구 추가 연동 및 클립보드 자동 백업 실행 함수 추가
+                // 최신 카카오 보안 기준을 적용한 친구 추가 연결 가동 함수 (중요 정책 패치 완료)
                 addKakaoFriend(phone) {
                     if (!phone) return;
-                    const clean = phone.replace(/[^0-9]/g, '');
-                    this.copyToClipboard(phone);
-                    this.showToast('번호 복사 후 카카오톡으로 연결합니다.');
                     
-                    // 0.5초 대기 후 카카오톡 친구 추가 전용 커스텀 스키마 실행
+                    // 1. 번호를 복사합니다.
+                    this.copyToClipboard(phone);
+                    
+                    // 2. 가이드를 동반한 토스트 팝업을 띄웁니다.
+                    this.showToast('번호 복사 완료! 카카오톡 [친구 추가]에서 붙여넣어 주세요.');
+                    
+                    // 3. 보안 필터 및 크래시 우회용 표준 앱 오프너 스키마(kakaotalk://)로 즉시 전송
                     setTimeout(() => {
-                        window.location.href = 'kakaotalk://friend/add?number=' + clean;
-                    }, 500);
+                        window.location.href = 'kakaotalk://';
+                    }, 600);
                 },
 
                 async fetchData(userInitiated = false) {
