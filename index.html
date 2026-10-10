@@ -5,18 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>파트너스 제휴보험사 연락처</title>
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js (defer 속성을 명확히 지정하여 로딩 타이밍 일치) -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <!-- Pretendard Font -->
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
-    
-    <!-- PWA Meta Tags -->
+    <!-- Open Graph / SNS 메타 태그 (카카오톡, 슬랙 등 링크 공유 최적화) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="파트너스 제휴보험사 연락처">
+    <meta property="og:description" content="제휴 보험사 및 파트너스본부 임직원 연락처 빠르고 간편하게 검색">
+    <meta property="og:url" content="https://contacts.long-run.app/">
+    <meta property="og:image" content="https://img.icons8.com/fluent/512/000000/address-book.png">
+    <meta name="twitter:card" content="summary">
+
+    <!-- 파비콘 및 PWA 매니페스트 -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluent/192/000000/address-book.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/fluent/192/000000/address-book.png">
+    <link rel="manifest" href="/manifest.webmanifest">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="보험사 연락처">
     <meta name="theme-color" content="#4f46e5">
+
+    <!-- 성능 최적화: 외부 CDN DNS 사전 조회 및 연결 -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://docs.google.com">
+    <link rel="dns-prefetch" href="https://docs.google.com">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js (defer 속성으로 DOM 렌더링 블로킹 방지) -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    <!-- Pretendard Font (중복 선언 제거 및 최적화) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 
     <!-- 카카오톡 인앱 브라우저 강제 아웃링크(외부 브라우저 실행) 스크립트 -->
     <script>
@@ -24,30 +43,21 @@
             const useragt = navigator.userAgent.toLowerCase();
             const targetUrl = window.location.href;
             if (useragt.match(/kakaotalk/i)) {
-                // 카카오톡 전용 스키마를 사용하여 외부 기본 브라우저를 강제 작동시킵니다.
+                // 카카오톡 전용 스키마를 사용하여 외부 기본 브라우저를 강제 작동
                 window.location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(targetUrl);
             }
         })();
     </script>
 
+    <!-- PWA Service Worker 등록 -->
     <script>
-        const manifest = {
-            "name": "제휴보험사 연락처",
-            "short_name": "보험사 연락처",
-            "display": "standalone",
-            "start_url": "./index.html",
-            "background_color": "#f8fafc",
-            "theme_color": "#4f46e5",
-            "icons": [
-                { "src": "https://img.icons8.com/fluent/192/000000/address-book.png", "sizes": "192x192", "type": "image/png" },
-                { "src": "https://img.icons8.com/fluent/512/000000/address-book.png", "sizes": "512x512", "type": "image/png" }
-            ]
-        };
-        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = URL.createObjectURL(blob);
-        document.head.appendChild(link);
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').catch(err => {
+                    console.warn('SW registration skipped:', err);
+                });
+            });
+        }
     </script>
 
     <style>
@@ -65,33 +75,33 @@
 
     <div class="w-full max-w-md mx-auto min-h-screen flex flex-col bg-slate-50 shadow-2xl relative pb-20">
         
-        <!-- 상단 여백 및 높이를 슬림하게 조절한 헤더 -->
+        <!-- 상단 헤더 -->
         <header class="sticky top-0 z-40 bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-5 pt-4 pb-4 rounded-b-[1.25rem] shadow-lg">
             <div class="flex justify-between items-center mb-2.5">
                 <h1 class="text-lg font-bold tracking-tight">파트너스 제휴보험사 연락처</h1>
                 
                 <div class="flex items-center space-x-1">
                     <!-- 클라우드 동기화 아이콘 -->
-                    <button @click="fetchData(true)" class="p-2 bg-white/10 hover:bg-white/20 active:scale-90 transition-all rounded-full" title="데이터 동기화">
+                    <button @click="fetchData(true)" class="p-2 bg-white/10 hover:bg-white/20 active:scale-90 transition-all rounded-full" title="데이터 새로고침">
                         <svg class="w-5 h-5 text-white" :class="loading ? 'animate-spin' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                         </svg>
                     </button>
                     <!-- PWA 설치 알림 버튼 -->
-                    <button x-show="deferredPrompt" @click="installPWA()" class="p-2 bg-emerald-500 rounded-full animate-bounce" title="앱으로 설치">
+                    <button x-show="deferredPrompt" @click="installPWA()" class="p-2 bg-emerald-500 rounded-full animate-bounce" title="앱으로 설치" style="display: none;">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                     </button>
                     <!-- 진단도구 토글 버튼 -->
-                    <button @click="isDiagOpen = !isDiagOpen" class="p-2 bg-white/10 rounded-full text-xs" title="개발진단도구">⚙️</button>
+                    <button @click="isDiagOpen = !isDiagOpen" class="p-2 bg-white/10 rounded-full text-xs" title="연동 진단">⚙️</button>
                 </div>
             </div>
 
-            <!-- 검색 입력바 -->
+            <!-- 검색 입력바 (180ms 디바운스로 실시간 검색 성능 최적화) -->
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <svg class="h-4.5 w-4.5 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </span>
-                <input x-model="searchQuery" type="text" placeholder="이름, 보험사명 검색..." 
+                <input x-model.debounce.180ms="searchQuery" type="text" placeholder="이름, 보험사명 검색..." 
                        class="w-full pl-10 pr-10 py-2.5 bg-white/15 focus:bg-white text-white focus:text-slate-800 placeholder-indigo-200 focus:placeholder-slate-400 rounded-xl outline-none transition-all shadow-inner text-sm font-medium">
                 <button x-show="searchQuery.length > 0" @click="searchQuery = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-indigo-200">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -101,7 +111,7 @@
 
         <main class="flex-1 px-4 pt-2.5 pb-5 space-y-4 overflow-y-auto no-scrollbar">
 
-            <!-- PWA 스마트폰 홈 화면 추가 안내 메시지 카드 -->
+            <!-- PWA 스마트폰 홈 화면 추가 안내 카드 -->
             <div x-show="showPwaGuide && !isPwaActive()" class="bg-gradient-to-r from-amber-50 to-orange-50/50 border border-amber-200 p-4 rounded-2xl relative shadow-sm" x-transition style="display: none;">
                 <button @click="showPwaGuide = false" class="absolute top-3.5 right-3.5 text-amber-500 hover:text-amber-700" title="가이드 닫기">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
@@ -113,7 +123,7 @@
                     <div>
                         <h4 class="text-xs font-black text-amber-800">홈 화면에 앱으로 설치하는 방법</h4>
                         <p class="text-[11px] text-amber-700 mt-1 leading-relaxed">
-                            오른쪽 위에 움직이는 다운로드 아이콘(녹색)을 클릭하여 설치하시거나, 브라우저 설정 메뉴에서 <span class="font-bold">['홈 화면에 추가']</span> 혹은 <span class="font-bold">['설치']</span>를 선택하시면 스마트폰 홈 화면에서 터치 한 번으로 빠르게 연락처를 조회하실 수 있습니다.
+                            오른쪽 위에 움직이는 설치 아이콘(녹색)을 클릭하시거나, 브라우저 메뉴에서 <span class="font-bold">['홈 화면에 추가']</span>를 선택하시면 스마트폰 홈 화면에서 터치 한 번으로 연락처를 조회하실 수 있습니다.
                         </p>
                     </div>
                 </div>
@@ -123,20 +133,25 @@
             <div x-show="isDiagOpen" class="bg-slate-800 text-slate-200 p-4 rounded-2xl text-xs space-y-2 font-mono shadow-xl" style="display: none;" x-transition>
                 <div class="flex justify-between items-center border-b border-slate-700 pb-2">
                     <span class="font-bold text-amber-400">데이터 연동 진단</span>
-                    <button @click="isDiagOpen = false" class="text-slate-400">닫기</button>
+                    <button @click="isDiagOpen = false" class="text-slate-400 hover:text-white">닫기</button>
                 </div>
                 <p>상태: <span x-text="syncStatus" :class="syncStatus === '성공' ? 'text-emerald-400' : 'text-rose-400'"></span></p>
-                <p>총 데이터: <span x-text="contacts.length"></span>건</p>
+                <p>총 연락처 데이터: <span x-text="contacts.length"></span>건</p>
                 <p>마지막 동기화: <span x-text="lastSyncTime || '기록 없음'" class="text-sky-300"></span></p>
-                <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 text-white rounded-lg font-bold mt-2">캐시 초기화 및 재동기화</button>
+                <button @click="clearCacheAndFetch()" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold mt-2 transition-colors">캐시 초기화 및 강제 재동기화</button>
             </div>
             
             <!-- 통합 검색 결과 영역 -->
             <template x-if="searchQuery.trim().length > 0">
                 <div class="space-y-3">
-                    <h2 class="text-xs font-bold text-indigo-600 px-1">검색 결과 (<span x-text="filteredSearchResults().length"></span>건)</h2>
+                    <h2 class="text-xs font-bold text-indigo-600 px-1">검색 결과 (<span x-text="filteredSearchResults.length"></span>건)</h2>
                     <div class="grid gap-2.5">
-                        <template x-for="contact in filteredSearchResults()" :key="contact.phone1 + contact.name + contact.company">
+                        <template x-if="filteredSearchResults.length === 0">
+                            <div class="bg-white p-6 rounded-xl border border-slate-100 text-center text-slate-400 text-xs">
+                                검색된 연락처가 없습니다.
+                            </div>
+                        </template>
+                        <template x-for="(contact, idx) in filteredSearchResults" :key="contact.company + '_' + contact.name + '_' + idx">
                             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm" :class="contact.holiday ? 'opacity-60 bg-slate-50' : ''">
                                 <div class="flex justify-between items-start mb-2.5">
                                     <div>
@@ -161,10 +176,9 @@
                                                 <span class="text-slate-400 font-semibold shrink-0">전화:</span>
                                                 <span class="font-mono text-slate-800 font-bold" x-text="contact.phone1"></span>
                                             </div>
-                                            <!-- 카카오톡 연동 실패 완벽 해결: 카톡 버튼을 완벽히 삭제하여 UI 신뢰성 극대화 -->
                                             <div class="flex space-x-1.5 items-center shrink-0">
-                                                <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-150 rounded-lg shadow-sm">복사</button>
-                                                <a :href="'tel:' + contact.phone1" class="px-2.5 py-1 text-[10px] font-bold text-white bg-indigo-500 rounded-lg shadow-sm">전화</a>
+                                                <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-200 rounded-lg shadow-sm active:scale-95 transition-all">복사</button>
+                                                <a :href="'tel:' + contact.phone1" class="px-2.5 py-1 text-[10px] font-bold text-white bg-indigo-500 rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
                                             </div>
                                         </div>
                                     </template>
@@ -175,8 +189,8 @@
                                                 <span class="font-mono text-slate-800 font-bold" x-text="contact.phone2"></span>
                                             </div>
                                             <div class="flex space-x-1.5 items-center shrink-0">
-                                                <button @click="copyToClipboard(contact.phone2)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-150 rounded-lg shadow-sm">복사</button>
-                                                <a :href="'tel:' + contact.phone2" class="px-2.5 py-1 text-[10px] font-bold text-white bg-indigo-500 rounded-lg shadow-sm">전화</a>
+                                                <button @click="copyToClipboard(contact.phone2)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-200 rounded-lg shadow-sm active:scale-95 transition-all">복사</button>
+                                                <a :href="'tel:' + contact.phone2" class="px-2.5 py-1 text-[10px] font-bold text-white bg-indigo-500 rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
                                             </div>
                                         </div>
                                     </template>
@@ -186,7 +200,7 @@
                                                 <span class="text-slate-400 font-semibold shrink-0">팩스:</span>
                                                 <span class="font-mono text-slate-600" x-text="contact.fax"></span>
                                             </div>
-                                            <button @click="copyToClipboard(contact.fax)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-150 rounded-lg shadow-sm">복사</button>
+                                            <button @click="copyToClipboard(contact.fax)" class="px-2 py-1 text-[10px] bg-slate-50 border border-slate-200 rounded-lg shadow-sm active:scale-95 transition-all">복사</button>
                                         </div>
                                     </template>
                                     <template x-if="contact.notes">
@@ -202,6 +216,7 @@
                 </div>
             </template>
 
+            <!-- 기본 홈 화면 (카테고리별 아코디언 및 즐겨찾기) -->
             <template x-if="searchQuery.trim().length === 0">
                 <div class="space-y-4">
                     
@@ -242,7 +257,7 @@
                                     <template x-for="comp in getFavorites(cat)" :key="comp">
                                         <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl active:scale-95 transition-all cursor-pointer">
                                             <span class="text-xs font-bold text-slate-800 truncate" x-text="comp"></span>
-                                            <button @click.stop="toggleFavorite(comp, cat)" class="text-amber-400">
+                                            <button @click.stop="toggleFavorite(comp, cat)" class="text-amber-400 p-1">
                                                 <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.828l-3.9 2.834a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.9-2.834a1 1 0 00-1.175 0l-3.9 2.834c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.9-2.834c-.778-.577-.378-1.828.583-1.828h4.906a1 1 0 00.95-.69l1.519-4.674z"/></svg>
                                             </button>
                                         </div>
@@ -250,7 +265,7 @@
                                 </div>
 
                                 <!-- 나머지 보험사 목록 더보기 펼치기 단추 -->
-                                <button @click="isExpanded[cat] = !isExpanded[cat]" class="w-full flex justify-between items-center py-2.5 px-4 bg-slate-50 rounded-xl text-[11px] font-bold text-slate-500 transition-all">
+                                <button @click="isExpanded[cat] = !isExpanded[cat]" class="w-full flex justify-between items-center py-2.5 px-4 bg-slate-50 hover:bg-slate-100 rounded-xl text-[11px] font-bold text-slate-500 transition-all">
                                     <span x-text="isExpanded[cat] ? '기타 보험사 접기' : '기타 보험사 목록 펼치기'"></span>
                                     <svg class="w-3.5 h-3.5 transition-transform" :class="isExpanded[cat] ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" /></svg>
                                 </button>
@@ -260,7 +275,7 @@
                                     <template x-for="comp in getRemainingCompanies(cat)" :key="comp">
                                         <div @click="openCompanyDetails(comp, cat)" class="flex items-center justify-between bg-slate-50 p-3 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
                                             <span class="text-xs font-bold text-slate-700 truncate" x-text="comp"></span>
-                                            <button @click.stop="toggleFavorite(comp, cat)" class="text-slate-300">
+                                            <button @click.stop="toggleFavorite(comp, cat)" class="text-slate-300 hover:text-amber-400 p-1">
                                                 <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                                             </button>
                                         </div>
@@ -276,9 +291,9 @@
         <!-- 바텀 시트 팝업창 -->
         <div x-show="selectedCompany" class="fixed inset-0 z-50 overflow-hidden" style="display: none;">
             <!-- 모달 오버레이 배경 -->
-            <div @click="selectedCompany = null" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"></div>
+            <div @click="closeCompanyDetails()" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"></div>
             
-            <!-- 실제 슬라이드업 시트 바디 (높이 85vh 적용 및 스와이프 제스처 리스너 탑재) -->
+            <!-- 슬라이드업 시트 바디 (높이 85vh 적용 및 스와이프 제스처 리스너 탑재) -->
             <div class="absolute inset-x-0 bottom-0 max-w-md mx-auto w-full flex flex-col bg-white rounded-t-[2rem] overflow-hidden shadow-2xl transition-transform duration-300 bottom-sheet-transition" 
                  :class="selectedCompany ? 'translate-y-0' : 'translate-y-full'" 
                  style="height: 85vh;"
@@ -286,15 +301,15 @@
                  @touchmove="touchMove($event)"
                  @touchend="touchEnd($event)">
                 
-                <!-- 시트 상단 헤더 영역 클릭/터치 시 닫기 최적화 -->
-                <div @click="selectedCompany = null" class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50 sticky top-0 z-10 cursor-pointer active:bg-slate-100/50 transition-colors" title="터치하거나 아래로 밀어내리면 창이 닫힙니다.">
+                <!-- 시트 상단 헤더 영역 클릭/터치 시 닫기 -->
+                <div @click="closeCompanyDetails()" class="pt-3 pb-4 px-5 border-b border-slate-100 flex flex-col items-center bg-slate-50 sticky top-0 z-10 cursor-pointer active:bg-slate-100/50 transition-colors" title="터치하거나 아래로 밀어내리면 창이 닫힙니다.">
                     <div class="w-10 h-1 bg-slate-300 rounded-full mb-4"></div>
                     <div class="w-full flex items-center justify-between" @click.stop>
                         <div class="flex items-center space-x-2">
                             <span class="text-[10px] font-extrabold px-2 py-0.5 rounded border" :class="getCategoryStyle(selectedCompanyCat)" x-text="selectedCompanyCat"></span>
                             <h2 class="text-lg font-black text-slate-800" x-text="selectedCompany"></h2>
                         </div>
-                        <button @click="selectedCompany = null" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-extrabold text-xs rounded-xl transition-all">
+                        <button @click="closeCompanyDetails()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-extrabold text-xs rounded-xl transition-all">
                             닫기
                         </button>
                     </div>
@@ -306,7 +321,7 @@
                         <div class="space-y-2.5" :class="group.title.includes('고객센터') ? 'pt-6 border-t border-slate-100' : ''">
                             <h3 class="text-xs font-black text-indigo-600 tracking-wide border-l-2 border-indigo-500 pl-2" x-text="group.title"></h3>
                             <div class="grid gap-2">
-                                <template x-for="(contact, index) in group.contacts" :key="contact.phone1 + contact.name + index">
+                                <template x-for="(contact, index) in group.contacts" :key="contact.company + '_' + contact.name + '_' + index">
                                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-100" :class="contact.holiday ? 'opacity-50' : ''">
                                         
                                         <div class="flex items-center space-x-2 mb-1.5">
@@ -316,7 +331,6 @@
                                             </template>
                                         </div>
                                         
-                                        <!-- 카카오톡 연동 실패 완벽 해결: 카톡 버튼을 완벽히 삭제하여 UI 신뢰성 극대화 -->
                                         <div class="space-y-1.5 text-xs">
                                             <template x-if="contact.phone1">
                                                 <div class="flex justify-between items-center py-0.5">
@@ -325,7 +339,7 @@
                                                         <span class="font-mono text-slate-800 font-bold" x-text="contact.phone1"></span>
                                                     </div>
                                                     <div class="flex space-x-1.5 items-center shrink-0">
-                                                        <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                        <button @click="copyToClipboard(contact.phone1)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm active:scale-95 transition-all">복사</button>
                                                         <a :href="'tel:' + contact.phone1" class="px-3 py-1 text-white bg-indigo-500 font-bold rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
                                                     </div>
                                                 </div>
@@ -338,7 +352,7 @@
                                                         <span class="font-mono text-slate-800 font-bold" x-text="contact.phone2"></span>
                                                     </div>
                                                     <div class="flex space-x-1.5 items-center shrink-0">
-                                                        <button @click="copyToClipboard(contact.phone2)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                        <button @click="copyToClipboard(contact.phone2)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm active:scale-95 transition-all">복사</button>
                                                         <a :href="'tel:' + contact.phone2" class="px-3 py-1 text-white bg-indigo-500 font-bold rounded-lg shadow-sm active:scale-95 transition-all">전화</a>
                                                     </div>
                                                 </div>
@@ -350,7 +364,7 @@
                                                         <span class="text-slate-400 font-semibold">팩스:</span>
                                                         <span class="font-mono text-slate-600" x-text="contact.fax"></span>
                                                     </div>
-                                                    <button @click="copyToClipboard(contact.fax)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm">복사</button>
+                                                    <button @click="copyToClipboard(contact.fax)" class="px-2 py-1 text-[10px] bg-white border border-slate-200 rounded-lg shadow-sm active:scale-95 transition-all">복사</button>
                                                 </div>
                                             </template>
 
@@ -370,14 +384,17 @@
             </div>
         </div>
 
-        <!-- 알림 토스트 팝업 (위치를 상단 헤더 아래 영역인 'top-28'로 이동하여 OS 클립보드 토스트와의 중첩 겹침 완전 회피) -->
-        <div x-show="toastShow" class="fixed top-28 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/90 text-white text-xs px-5 py-3 rounded-full shadow-2xl" style="display: none;" x-transition>
+        <!-- 알림 토스트 팝업 -->
+        <div x-show="toastShow" class="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-slate-900/90 text-white text-xs px-5 py-3 rounded-full shadow-2xl transition-all" style="display: none;" x-transition>
             <span class="font-bold" x-text="toastMessage"></span>
         </div>
 
-        <!-- 로딩 인디케이터 -->
-        <div x-show="loading" class="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center" style="display: none;">
-            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <!-- 초기 데이터 없을 때만 표시되는 풀스크린 로딩 인디케이터 -->
+        <div x-show="loading && contacts.length === 0" class="fixed inset-0 bg-white/70 backdrop-blur-sm z-50 flex items-center justify-center" style="display: none;">
+            <div class="flex flex-col items-center space-y-3">
+                <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                <span class="text-xs font-bold text-indigo-700">연락처를 불러오는 중...</span>
+            </div>
         </div>
 
     </div>
@@ -391,7 +408,6 @@
                 contacts: [], 
                 loading: false, 
                 searchQuery: '', 
-                innerSearchQuery: '',
                 selectedCompany: null, 
                 selectedCompanyCat: null,
                 toastShow: false, 
@@ -422,33 +438,36 @@
                 },
 
                 init() {
+                    // 1. 즐겨찾기 로드
                     this.loadFavorites();
                     this.loadLastSyncTime();
-                    this.fetchData();
+
+                    // 2. SWR (Stale-While-Revalidate): 로컬 캐시가 있으면 즉시 화면에 렌더링 (체감 로딩 0초)
+                    const cachedData = localStorage.getItem('cached_db_v6');
+                    if (cachedData) {
+                        try {
+                            this.contacts = JSON.parse(cachedData);
+                            this.syncStatus = '캐시 로드됨';
+                        } catch (e) {
+                            console.error('캐시 파싱 오류:', e);
+                        }
+                    }
+
+                    // 3. 백그라운드 데이터 동기화 (캐시가 있으면 백그라운드로, 없으면 스피너 표시)
+                    this.fetchData(false);
+
+                    // 4. PWA 설치 이벤트 등록
                     window.addEventListener('beforeinstallprompt', (e) => { 
                         e.preventDefault(); 
                         this.deferredPrompt = e; 
                     });
 
-                    window.history.pushState({ page: 'home' }, '');
+                    // 5. 모바일 뒤로가기 제어 (바텀시트가 열려있을 때 닫기 처리)
+                    window.history.replaceState({ page: 'home' }, '');
                     window.addEventListener('popstate', (e) => {
                         if (this.selectedCompany) {
                             this.selectedCompany = null;
-                            window.history.pushState({ page: 'home' }, '');
                             return;
-                        }
-
-                        const now = Date.now();
-                        if (now - this.lastBackPress < 2000) {
-                            this.showToast('앱을 종료합니다.');
-                            setTimeout(() => {
-                                window.close();
-                                window.location.href = 'about:blank'; 
-                            }, 350);
-                        } else {
-                            this.lastBackPress = now;
-                            this.showToast('앱을 종료하려면 뒤로가기를 한 번 더 누르세요.');
-                            window.history.pushState({ page: 'home' }, ''); 
                         }
                     });
                 },
@@ -461,8 +480,8 @@
                     this.touchEndY = e.touches[0].clientY;
                 },
                 touchEnd() {
-                    if (this.touchEndY - this.touchStartY > 100) {
-                        this.selectedCompany = null;
+                    if (this.touchEndY - this.touchStartY > 90) {
+                        this.closeCompanyDetails();
                         this.showToast('팝업을 닫았습니다.');
                     }
                     this.touchStartY = 0;
@@ -473,12 +492,11 @@
                     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
                 },
 
-                // 겹침 현상 극복을 위해 유지 시간(Timeout)을 3.5초(3500ms)로 길게 갱신
                 showToast(msg) {
                     if (this.toastTimeout) clearTimeout(this.toastTimeout);
                     this.toastMessage = msg; 
                     this.toastShow = true;
-                    this.toastTimeout = setTimeout(() => this.toastShow = false, 3500);
+                    this.toastTimeout = setTimeout(() => this.toastShow = false, 2800);
                 },
 
                 getCategoryStyle(cat) {
@@ -541,7 +559,7 @@
                         this.showToast(`${comp} 즐겨찾기 해제`); 
                     } else {
                         if (f.length >= 6) { 
-                            this.showToast('최대 6개까지만 설정할 수 있습니다.'); 
+                            this.showToast('즐겨찾기는 최대 6개까지 등록할 수 있습니다.'); 
                             return; 
                         }
                         f.push(comp); 
@@ -559,7 +577,9 @@
                 },
 
                 clearCacheAndFetch() { 
-                    localStorage.clear(); 
+                    localStorage.removeItem('cached_db_v6');
+                    localStorage.removeItem('last_sync_time_v6');
+                    this.contacts = [];
                     this.lastSyncTime = '';
                     this.fetchData(true); 
                 },
@@ -574,8 +594,9 @@
                 },
 
                 async fetchData(userInitiated = false) {
+                    // 데이터가 하나도 없을 때만 화면 로딩 표시
                     this.loading = true; 
-                    this.syncStatus = '연결 중';
+                    this.syncStatus = '연결 중...';
                     const sId = '1jE81bhIsmRv3JmJRjs-jMKMk5d6ArQDQ2ODGleLcZvY';
                     const sName = encodeURIComponent('보험사연락처_DB');
                     
@@ -664,12 +685,15 @@
                         localStorage.setItem('last_sync_time_v6', this.lastSyncTime);
 
                         this.syncStatus = '성공';
-                        if (userInitiated) this.showToast('동기화 완료');
+                        if (userInitiated) this.showToast('데이터 동기화 완료');
                     } catch (e) {
+                        console.error('동기화 실패:', e);
                         const c = localStorage.getItem('cached_db_v6');
                         if (c) { 
                             this.contacts = JSON.parse(c); 
-                            this.showToast('네트워크 오류: 오프라인 캐시 적용됨'); 
+                            this.showToast('오프라인 캐시 적용됨'); 
+                        } else {
+                            this.showToast('네트워크 오류가 발생했습니다.');
                         }
                         this.syncStatus = '실패';
                     } finally { 
@@ -679,7 +703,18 @@
 
                 openCompanyDetails(comp, cat) { 
                     this.selectedCompany = comp; 
-                    this.selectedCompanyCat = cat; 
+                    this.selectedCompanyCat = cat;
+                    // 뒤로가기 지원을 위한 히스토리 상태 추가
+                    window.history.pushState({ page: 'details', company: comp }, '');
+                },
+
+                closeCompanyDetails() {
+                    if (this.selectedCompany) {
+                        this.selectedCompany = null;
+                        if (window.history.state && window.history.state.page === 'details') {
+                            window.history.back();
+                        }
+                    }
                 },
 
                 getGroupedCompanyContacts() {
@@ -735,26 +770,60 @@
                     return groups;
                 },
 
-                filteredSearchResults() {
+                get filteredSearchResults() {
                     const q = this.searchQuery.trim().toLowerCase();
                     if (!q) return [];
-                    return this.contacts.filter(c => c.name.toLowerCase().includes(q) || (c.company || '').toLowerCase().includes(q))
-                        .sort((a, b) => a.company.localeCompare(b.company, 'ko') || a.name.localeCompare(b.name, 'ko'));
+                    return this.contacts.filter(c => 
+                        (c.name && c.name.toLowerCase().includes(q)) || 
+                        (c.company && c.company.toLowerCase().includes(q)) ||
+                        (c.phone1 && c.phone1.replace(/[^0-9]/g, '').includes(q.replace(/[^0-9]/g, '')))
+                    ).sort((a, b) => a.company.localeCompare(b.company, 'ko') || a.name.localeCompare(b.name, 'ko'));
                 },
 
-                copyToClipboard(t) {
-                    const el = document.createElement('textarea'); 
-                    el.value = t; 
-                    document.body.appendChild(el);
-                    el.select(); 
-                    document.execCommand('copy'); 
-                    document.body.removeChild(el);
-                    this.showToast('번호가 복사되었습니다.');
+                async copyToClipboard(text) {
+                    if (!text) return;
+                    
+                    // 1. 최신 비동기 Clipboard API 우선 시도 (Vercel HTTPS 환경에서 완벽 지원)
+                    if (navigator.clipboard && window.isSecureContext) {
+                        try {
+                            await navigator.clipboard.writeText(text);
+                            this.showToast('번호가 복사되었습니다.');
+                            return;
+                        } catch (err) {
+                            console.warn('Clipboard API 실패, 대체 복사 방식 사용:', err);
+                        }
+                    }
+
+                    // 2. 대체 방식 (Fallback)
+                    try {
+                        const el = document.createElement('textarea'); 
+                        el.value = text;
+                        el.style.position = 'fixed';
+                        el.style.top = '0';
+                        el.style.left = '0';
+                        el.style.opacity = '0';
+                        document.body.appendChild(el);
+                        el.focus();
+                        el.select(); 
+                        const successful = document.execCommand('copy'); 
+                        document.body.removeChild(el);
+                        if (successful) {
+                            this.showToast('번호가 복사되었습니다.');
+                        } else {
+                            this.showToast('복사에 실패했습니다. 직접 복사해주세요.');
+                        }
+                    } catch (err) {
+                        this.showToast('복사 기능을 지원하지 않는 환경입니다.');
+                    }
                 },
 
                 async installPWA() { 
                     if (this.deferredPrompt) { 
                         this.deferredPrompt.prompt(); 
+                        const choiceResult = await this.deferredPrompt.userChoice;
+                        if (choiceResult.outcome === 'accepted') {
+                            this.showToast('앱이 성공적으로 설치되었습니다.');
+                        }
                         this.deferredPrompt = null; 
                     } 
                 }
