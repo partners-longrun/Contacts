@@ -771,13 +771,35 @@
                 },
 
                 get filteredSearchResults() {
-                    const q = this.searchQuery.trim().toLowerCase();
-                    if (!q) return [];
-                    return this.contacts.filter(c => 
-                        (c.name && c.name.toLowerCase().includes(q)) || 
-                        (c.company && c.company.toLowerCase().includes(q)) ||
-                        (c.phone1 && c.phone1.replace(/[^0-9]/g, '').includes(q.replace(/[^0-9]/g, '')))
-                    ).sort((a, b) => a.company.localeCompare(b.company, 'ko') || a.name.localeCompare(b.name, 'ko'));
+                    const rawQ = this.searchQuery.trim().toLowerCase();
+                    if (!rawQ) return [];
+
+                    const keywords = rawQ.split(/\s+/).filter(Boolean);
+                    const qDigits = rawQ.replace(/[^0-9]/g, '');
+
+                    return this.contacts.filter(c => {
+                        const name = (c.name || '').toLowerCase();
+                        const rank = (c.rank || '').toLowerCase();
+                        const company = (c.company || '').toLowerCase();
+                        const notes = (c.notes || '').toLowerCase();
+                        const displayName = this.getDisplayName(c).toLowerCase();
+                        const searchableText = `${company} ${name} ${rank} ${displayName} ${notes}`;
+
+                        // 1. 텍스트 매칭: 입력된 모든 키워드가 포함되어 있는지 확인
+                        const isTextMatch = keywords.every(kw => searchableText.includes(kw));
+
+                        // 2. 전화번호 매칭: 사용자가 숫자를 1자리 이상 입력한 경우에만 번호 검색 수행
+                        const phone1Digits = (c.phone1 || '').replace(/[^0-9]/g, '');
+                        const phone2Digits = (c.phone2 || '').replace(/[^0-9]/g, '');
+                        const faxDigits = (c.fax || '').replace(/[^0-9]/g, '');
+                        const isPhoneMatch = qDigits.length > 0 && (
+                            phone1Digits.includes(qDigits) ||
+                            phone2Digits.includes(qDigits) ||
+                            faxDigits.includes(qDigits)
+                        );
+
+                        return isTextMatch || isPhoneMatch;
+                    }).sort((a, b) => a.company.localeCompare(b.company, 'ko') || a.name.localeCompare(b.name, 'ko'));
                 },
 
                 async copyToClipboard(text) {
